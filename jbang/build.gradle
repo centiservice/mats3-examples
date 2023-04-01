@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+
+repositories {
+    maven{
+        url "/home/endre/localmaven"
+    }
+    mavenCentral();
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['.']
+        }
+    }
+}
+
+dependencies {
+    implementation project(':mats-examples')
+    //implementation 'io.mats3.examples:mats-examples:0.0.1'
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}

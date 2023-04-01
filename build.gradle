@@ -1,0 +1,5 @@
+wrapper {
+    gradleVersion = "8.0.2"
+    setDistributionType(Wrapper.DistributionType.ALL)
+}
+

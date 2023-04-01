@@ -1,0 +1,104 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = 'io.mats3.examples'
+version = '0.0.1'
+
+publishing {
+//    repositories {
+//        maven {
+//            url "~/mats3-examples-localmaven"
+//            name "LocalMaven"
+//        }
+//    }
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Mats Examples'
+                description = 'Tooling to create simple Mats3 examples'
+                url = 'https://github.com/centiservice/mats-examples'
+                licenses {
+                    license {
+                        name = 'PolyForm Perimeter License 1.0.0 with examples'
+                        url = 'https://github.com/centiservice/matssocket/blob/main/LICENSE.md'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'stolsvik'
+                        name = 'Endre Stølsvik'
+                        email = 'endre@stolsvik.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/centiservice/matssocket.git'
+                    developerConnection = 'scm:git:ssh://github.com:centiservice/matssocket.git'
+                    url = 'https://github.com/centiservice/matssocket'
+                }
+            }
+            from components.java
+        }
+    }
+}
+
+ext {
+    version_Mats = '0.19.6-2023-03-29'
+    version_ActiveMq = '5.17.4'
+    version_Logback = '1.4.6'
+    version_ClassGraph = '4.8.157'
+    version_Jetty = '11.0.14'
+
+    // Test
+    version_Jackson = '2.14.2'
+    version_Junit = '4.13.2'
+}
+
+dependencies {
+    api "org.apache.activemq:activemq-broker:$version_ActiveMq"
+    api "org.apache.activemq:activemq-kahadb-store:$version_ActiveMq"
+
+    api "ch.qos.logback:logback-classic:$version_Logback"
+
+    api "io.mats3:mats-impl-jms:$version_Mats"
+    api "io.mats3:mats-serial-json:$version_Mats"
+    api "io.mats3:mats-test:$version_Mats"
+    api "io.mats3:mats-test-broker:$version_Mats"
+    api "io.mats3:mats-intercept-logging:$version_Mats"
+    // api "io.mats3:mats-intercept-micrometer:$version_Mats"
+
+    api "io.github.classgraph:classgraph:$version_ClassGraph"
+
+    // :: Jetty
+    // Base Jetty Server
+    api "org.eclipse.jetty:jetty-server:$version_Jetty"
+    // .. Jetty Servlets
+    api "org.eclipse.jetty:jetty-webapp:$version_Jetty"
+    // .. Jetty: To get the @WebListener etc. annotation scanning.
+    api "org.eclipse.jetty:jetty-annotations:$version_Jetty"
+
+    // :: ActiveMQ console - which I didn't manage to get running, due to JSP being awful.
+    // api "org.apache.activemq:activemq-web-console:${version_ActiveMq}@war"
+    // api "org.eclipse.jetty:apache-jsp:$version_Jetty"
+    // api "org.eclipse.jetty:apache-jstl:$version_Jetty"
+    // api "javax.servlet:jstl:1.2"  // this didn't work either..
+
+    // :: Testing:
+    // Junit
+    testImplementation "junit:junit:$version_Junit"
+    // Dependency on the Jackson JSON library, which is the serialization mechanism in use.
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:${version_Jackson}"
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${version_Jackson}"
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${version_Jackson}"
+
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
