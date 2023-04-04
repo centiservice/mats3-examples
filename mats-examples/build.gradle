@@ -11,12 +11,12 @@ group = 'io.mats3.examples'
 version = '0.0.1'
 
 publishing {
-//    repositories {
-//        maven {
-//            url "~/mats3-examples-localmaven"
-//            name "LocalMaven"
-//        }
-//    }
+    //    repositories {
+    //        maven {
+    //            url "~/mats3-examples-localmaven"
+    //            name "LocalMaven"
+    //        }
+    //    }
     publications {
         mavenJava(MavenPublication) {
             pom {
@@ -54,6 +54,8 @@ ext {
     version_ClassGraph = '4.8.157'
     version_Jetty = '11.0.14'
 
+    version_MatsBrokerMonitor = '0.1.5-2022-11-13'
+
     // Test
     version_Jackson = '2.14.2'
     version_Junit = '4.13.2'
@@ -68,11 +70,13 @@ dependencies {
     api "io.mats3:mats-impl-jms:$version_Mats"
     api "io.mats3:mats-serial-json:$version_Mats"
     api "io.mats3:mats-test:$version_Mats"
+    api "io.mats3:mats-localinspect:$version_Mats"
     api "io.mats3:mats-test-broker:$version_Mats"
     api "io.mats3:mats-intercept-logging:$version_Mats"
-    // api "io.mats3:mats-intercept-micrometer:$version_Mats"
 
-    api "io.github.classgraph:classgraph:$version_ClassGraph"
+    api "io.mats3.matsbrokermonitor:matsbrokermonitor-activemq:$version_MatsBrokerMonitor"
+    api "io.mats3.matsbrokermonitor:matsbrokermonitor-htmlgui:$version_MatsBrokerMonitor"
+    api "io.mats3.matsbrokermonitor:matsbrokermonitor-jms:$version_MatsBrokerMonitor"
 
     // :: Jetty
     // Base Jetty Server
@@ -82,19 +86,18 @@ dependencies {
     // .. Jetty: To get the @WebListener etc. annotation scanning.
     api "org.eclipse.jetty:jetty-annotations:$version_Jetty"
 
-    // :: ActiveMQ console - which I didn't manage to get running, due to JSP being awful.
-    // api "org.apache.activemq:activemq-web-console:${version_ActiveMq}@war"
-    // api "org.eclipse.jetty:apache-jsp:$version_Jetty"
-    // api "org.eclipse.jetty:apache-jstl:$version_Jetty"
-    // api "javax.servlet:jstl:1.2"  // this didn't work either..
-
     // :: Testing:
     // Junit
     testImplementation "junit:junit:$version_Junit"
-    // Dependency on the Jackson JSON library, which is the serialization mechanism in use.
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:${version_Jackson}"
-    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${version_Jackson}"
-    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${version_Jackson}"
+
+    // :: ActiveMQ console - which I didn't manage to get running, due to JSP being awful.
+    // (Attempt that didn't work out, keeping code for now)
+    // .. this needs to be present due to complile time dep in "FindActiveMqConsole"
+    testImplementation "io.github.classgraph:classgraph:$version_ClassGraph"
+    // testImplementation "org.apache.activemq:activemq-web-console:${version_ActiveMq}@war"
+    // testImplementation "org.eclipse.jetty:apache-jsp:$version_Jetty"
+    // testImplementation "org.eclipse.jetty:apache-jstl:$version_Jetty"
+    // testImplementation "javax.servlet:jstl:1.2"  // this didn't work either..
 
 }
 

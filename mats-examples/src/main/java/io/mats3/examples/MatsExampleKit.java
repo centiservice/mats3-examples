@@ -1,6 +1,6 @@
 package io.mats3.examples;
 
-import java.net.URL;
+import javax.jms.ConnectionFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.region.Queue;
@@ -17,12 +17,10 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.InfoStatus;
 import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.util.StatusPrinter;
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ResourceList;
-import io.github.classgraph.ScanResult;
 import io.mats3.MatsFactory;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.impl.jms.JmsMatsJmsSessionHandler_Pooling;
+import io.mats3.serial.MatsSerializer;
 import io.mats3.serial.json.MatsSerializerJson;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.RandomString;
@@ -34,29 +32,37 @@ public class MatsExampleKit {
 
     private static final Logger log = MatsTestHelp.getClassLogger();
 
-    public static MatsFactory createMatsFactory(String appname) {
-        MatsExampleKit.configureLogbackToConsole_Info();
-
+    public static ConnectionFactory createLocalhostActiveMqConnectionFactory() {
         // :: Make ActiveMq JMS ConnectionFactory, towards localhost (which is default, using failover protocol)
         ActiveMQConnectionFactory jmsConnectionFactory = new ActiveMQConnectionFactory();
         // We won't be needing Topic Advisories (we don't use temp queues/topics), so don't subscribe to them.
         jmsConnectionFactory.setWatchTopicAdvisories(false);
+        return jmsConnectionFactory;
+    }
+
+    public static JmsMatsFactory<String> createMatsFactory(String appName) {
+        MatsExampleKit.configureLogbackToConsole_Info();
+        return createMatsFactory(createLocalhostActiveMqConnectionFactory(), appName);
+    }
+
+    public static JmsMatsFactory<String> createMatsFactory(ConnectionFactory jmsConnectionFactory, String appName) {
+        MatsExampleKit.configureLogbackToConsole_Info();
 
         // :: Make the JMS-based MatsFactory, providing the JMS ConnectionFactory
-        MatsFactory matsFactory = JmsMatsFactory.createMatsFactory_JmsOnlyTransactions(appname, "#examples#",
+        JmsMatsFactory<String> matsFactory = JmsMatsFactory.createMatsFactory_JmsOnlyTransactions(appName, "#examples#",
                 JmsMatsJmsSessionHandler_Pooling.create(jmsConnectionFactory),
                 MatsSerializerJson.create());
         // .. turn down the concurrency from default cpus * 2, as that is pretty heavy on an e.g. 8-core machine.
         matsFactory.getFactoryConfig().setConcurrency(2);
-        // .. set a unique nodename emulating "hosts", so if we use futurizers, they won't step on each other's toes
+        // .. set a unique nodename emulating multiple hosts on a single machine, so if we use futurizers, they won't
+        // step on each other's toes
         String origNodename = matsFactory.getFactoryConfig().getNodename();
-        matsFactory.getFactoryConfig().setNodename(origNodename + RandomString.randomString(6));
+        matsFactory.getFactoryConfig().setNodename(origNodename + "_" + RandomString.randomString(6));
 
         // :: Add a shutdownhook to take it down in case of e.g. Ctrl-C - if it has not been done by the code.
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (matsFactory.getFactoryConfig().isRunning()) {
                 try {
-
                     matsFactory.stop(10_000);
                 }
                 catch (Exception e) {
@@ -169,28 +175,5 @@ public class MatsExampleKit {
         configureLogLevel(AbstractInactivityMonitor.class, Level.INFO);
         // This is periodic, quite often, on the broker if persistence is enabled
         configureLogLevel(MessageDatabase.class, Level.INFO);
-    }
-
-    public static URL getActiveMqConsoleWarFile() {
-        long nanosAtStart_findingUrl = System.nanoTime();
-        try (ScanResult result = new ClassGraph()
-                .acceptJars("activemq-web-console*.war")
-                .disableNestedJarScanning()
-                // .verbose() // Log to stderr
-                .enableAllInfo() // Scan classes, methods, fields, annotations
-                .scan()) { // Start the scan
-            ResourceList resourceList = result.getResourcesWithLeafName("index.jsp");
-            log.info("Size: " + resourceList.getURLs().size());
-            if (resourceList.getURLs().isEmpty()) {
-                throw new IllegalStateException("dammit");
-            }
-            URL url = resourceList.get(1).getClasspathElementURL();
-
-            double msTaken = (System.nanoTime() - nanosAtStart_findingUrl) / 1_000_000d;
-
-            log.info("url: " + url + ", ms taken: " + msTaken);
-
-            return url;
-        }
     }
 }
