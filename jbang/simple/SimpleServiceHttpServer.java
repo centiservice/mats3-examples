@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import io.mats3.examples.FunctionalAsyncListener;
+import io.mats3.examples.MatsExampleJettyServer.FunctionalAsyncListener;
 import io.mats3.examples.MatsExampleJettyServer;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;

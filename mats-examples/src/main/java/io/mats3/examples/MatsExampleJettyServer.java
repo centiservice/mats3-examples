@@ -23,6 +23,8 @@ import io.mats3.localinspect.LocalHtmlInspectForMatsFactory;
 import io.mats3.localinspect.LocalStatsMatsInterceptor;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebServlet;
@@ -38,6 +40,7 @@ public interface MatsExampleJettyServer {
     String CONTEXT_ATTRIBUTE_PORTNUMBER = "ServerPortNumber";
 
     MatsExampleJettyServer addMatsFactory(String appName);
+
     MatsExampleJettyServer addMatsFactory();
 
     MatsExampleJettyServer addMatsLocalInspect();
@@ -294,6 +297,101 @@ public interface MatsExampleJettyServer {
             _rootHtlm = rootHtml;
             // .. for chaining
             return this;
+        }
+    }
+
+    /**
+     * Adapt the Servlet {@link AsyncListener} to a bit more modern-looking {@link FunctionalInterface}.
+     *
+     * @author Endre Stølsvik 2023-03-30 22:48 - http://stolsvik.com/, endre@stolsvik.com
+     */
+    @FunctionalInterface
+    interface FunctionalAsyncListener {
+
+        void event(AsyncEvent asyncEvent) throws IOException;
+
+        static AsyncListener onStartAsync(FunctionalAsyncListener startAsyncListener) {
+            return new AsyncListener() {
+                @Override
+                public void onStartAsync(AsyncEvent event) throws IOException {
+                    startAsyncListener.event(event);
+                }
+
+                @Override
+                public void onComplete(AsyncEvent event) {
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) {
+                }
+
+                @Override
+                public void onError(AsyncEvent event) {
+                }
+            };
+        }
+
+        static AsyncListener onComplete(FunctionalAsyncListener timeoutListener) {
+            return new AsyncListener() {
+                @Override
+                public void onStartAsync(AsyncEvent event) {
+                }
+
+                @Override
+                public void onComplete(AsyncEvent event) throws IOException {
+                    timeoutListener.event(event);
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) {
+                }
+
+                @Override
+                public void onError(AsyncEvent event) {
+                }
+            };
+        }
+
+        static AsyncListener onTimeout(FunctionalAsyncListener timeoutListener) {
+            return new AsyncListener() {
+                @Override
+                public void onStartAsync(AsyncEvent event) {
+                }
+
+                @Override
+                public void onComplete(AsyncEvent event) {
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) throws IOException {
+                    timeoutListener.event(event);
+                }
+
+                @Override
+                public void onError(AsyncEvent event) {
+                }
+            };
+        }
+
+        static AsyncListener onError(FunctionalAsyncListener timeoutListener) {
+            return new AsyncListener() {
+                @Override
+                public void onStartAsync(AsyncEvent event) {
+                }
+
+                @Override
+                public void onComplete(AsyncEvent event) {
+                }
+
+                @Override
+                public void onTimeout(AsyncEvent event) {
+                }
+
+                @Override
+                public void onError(AsyncEvent event) throws IOException {
+                    timeoutListener.event(event);
+                }
+            };
         }
     }
 }
