@@ -39,13 +39,13 @@ public interface MatsExampleJettyServer {
 
     String CONTEXT_ATTRIBUTE_PORTNUMBER = "ServerPortNumber";
 
+    MatsExampleJettyServer setRootHtlm(String html);
+
     MatsExampleJettyServer addMatsFactory(String appName);
 
     MatsExampleJettyServer addMatsFactory();
 
     MatsExampleJettyServer addMatsLocalInspect();
-
-    MatsExampleJettyServer setRootHtlm(String html);
 
     WebAppContext getWebAppContext();
 
@@ -136,6 +136,31 @@ public interface MatsExampleJettyServer {
         private boolean _addMatsLocalInspect;
         private String _rootHtlm;
 
+        @Override
+        public MatsExampleJettyServer setRootHtlm(String rootHtml) {
+            _rootHtlm = rootHtml;
+            // .. for chaining
+            return this;
+        }
+
+        @Override
+        public MatsExampleJettyServer addMatsFactory(String appName) {
+            _addMatsInit_AppName = appName;
+            // .. for chaining
+            return this;
+        }
+
+        @Override
+        public MatsExampleJettyServer addMatsFactory() {
+            return addMatsFactory(_callingClass.getSimpleName());
+        }
+
+        @Override
+        public MatsExampleJettyServer addMatsLocalInspect() {
+            _addMatsLocalInspect = true;
+            // .. for chaining
+            return this;
+        }
 
         @Override
         public WebAppContext getWebAppContext() {
@@ -150,94 +175,16 @@ public interface MatsExampleJettyServer {
         @Override
         public void start() {
             if (_addMatsInit_AppName != null) {
-                // The ServletContextListener creates the app MatsFactory and MatsFuturizer, for use by Servlets.
-                _webAppContext.addEventListener(new ServletContextListener() {
-                    private MatsFactory _matsFactory;
-                    private MatsFuturizer _matsFuturizer;
-
-                    @Override
-                    public void contextInitialized(ServletContextEvent sce) {
-                        // Create the MatsFactory and then MatsFuturizer
-                        _matsFactory = MatsExampleKit.createMatsFactory(_addMatsInit_AppName);
-                        _matsFuturizer = MatsFuturizer.createMatsFuturizer(_matsFactory);
-                        // Put these in the ServletContext, so that the Servlets can get hold of it.
-                        sce.getServletContext().setAttribute(MatsFactory.class.getName(), _matsFactory);
-                        sce.getServletContext().setAttribute(MatsFuturizer.class.getName(), _matsFuturizer);
-                    }
-
-                    @Override
-                    public void contextDestroyed(ServletContextEvent sce) {
-                        // Clean up.
-                        _matsFuturizer.close();
-                        _matsFactory.stop(30_000);
-                    }
-                });
+                includeMatsFactoryAndFuturizerScl();
             }
 
             if (_addMatsLocalInspect) {
                 // The ServletContextListener creates the LocalHtmlInspectForMatsFactory and puts it in ServletContext
-                _webAppContext.addEventListener(new ServletContextListener() {
-                    @Override
-                    public void contextInitialized(ServletContextEvent sce) {
-                        // Fetch MatsFactory from ServletContext
-                        var matsFactory = (MatsFactory) sce.getServletContext()
-                                .getAttribute(MatsFactory.class.getName());
-                        // :: Sanity assert
-                        if (matsFactory == null) {
-                            throw new IllegalStateException("Missing MatsFactory in ServletContext. You may add one"
-                                    + " using " + MatsExampleJettyServer.class.getSimpleName() + ".addMatsInit().");
-                        }
-
-                        LocalStatsMatsInterceptor.install((MatsInterceptable) matsFactory);
-
-                        LocalHtmlInspectForMatsFactory li = LocalHtmlInspectForMatsFactory.create(matsFactory);
-                        sce.getServletContext().setAttribute(LocalHtmlInspectForMatsFactory.class.getName(), li);
-                    }
-                });
-
-                // Add Servlet that serves the LocalInspect.
-                ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
-                    @Override
-                    protected void doGet(HttpServletRequest req,
-                            HttpServletResponse resp) throws IOException {
-                        resp.setContentType("text/html; charset=UTF-8");
-
-                        var localInspect = (LocalHtmlInspectForMatsFactory) req.getServletContext()
-                                .getAttribute(LocalHtmlInspectForMatsFactory.class.getName());
-
-                        PrintWriter out = resp.getWriter();
-
-                        out.println("<!DOCTYPE html>");
-                        out.println("<html>");
-                        out.println("  <body>");
-                        out.println("    <style>");
-                        localInspect.getStyleSheet(out); // Include just once, use the first.
-                        out.println("    </style>");
-                        out.println("    <script>");
-                        localInspect.getJavaScript(out); // Include just once, use the first.
-                        out.println("    </script>");
-                        out.println(" <a href=\".\">Back to root</a><br><br>");
-                        out.println("<h1>Embeddable Introspection GUI</h1>");
-                        localInspect.createFactoryReport(out, true, true, true);
-
-                        out.println("  </body>");
-                        out.println("</html>");
-                    }
-                });
-                _webAppContext.addServlet(servletHolder, "/localinspect");
+                includeMatsLocalInspectSclAndServlet();
             }
 
             if (_rootHtlm != null) {
-                ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
-                    @Override
-                    protected void doGet(HttpServletRequest req,
-                            HttpServletResponse resp) throws IOException {
-                        resp.setContentType("text/html; charset=UTF-8");
-                        PrintWriter out = resp.getWriter();
-                        out.println(_rootHtlm);
-                    }
-                });
-                _webAppContext.addServlet(servletHolder, "");
+                includeRootServletWithHtml();
             }
 
             try {
@@ -246,6 +193,96 @@ public interface MatsExampleJettyServer {
             catch (Exception e) {
                 throw new AssertionError("Could not start Jetty.", e);
             }
+        }
+
+        private void includeRootServletWithHtml() {
+            ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
+                @Override
+                protected void doGet(HttpServletRequest req,
+                        HttpServletResponse resp) throws IOException {
+                    resp.setContentType("text/html; charset=UTF-8");
+                    PrintWriter out = resp.getWriter();
+                    out.println(_rootHtlm);
+                }
+            });
+            _webAppContext.addServlet(servletHolder, "");
+        }
+
+        private void includeMatsFactoryAndFuturizerScl() {
+            // The ServletContextListener creates the app MatsFactory and MatsFuturizer, for use by Servlets.
+            _webAppContext.addEventListener(new ServletContextListener() {
+                private MatsFactory _matsFactory;
+                private MatsFuturizer _matsFuturizer;
+
+                @Override
+                public void contextInitialized(ServletContextEvent sce) {
+                    // Create the MatsFactory and then MatsFuturizer
+                    _matsFactory = MatsExampleKit.createMatsFactory(_addMatsInit_AppName);
+                    _matsFuturizer = MatsFuturizer.createMatsFuturizer(_matsFactory);
+                    // Put these in the ServletContext, so that the Servlets can get hold of it.
+                    sce.getServletContext().setAttribute(MatsFactory.class.getName(), _matsFactory);
+                    sce.getServletContext().setAttribute(MatsFuturizer.class.getName(), _matsFuturizer);
+                }
+
+                @Override
+                public void contextDestroyed(ServletContextEvent sce) {
+                    // Clean up.
+                    _matsFuturizer.close();
+                    _matsFactory.stop(30_000);
+                }
+            });
+        }
+
+        private void includeMatsLocalInspectSclAndServlet() {
+            _webAppContext.addEventListener(new ServletContextListener() {
+                @Override
+                public void contextInitialized(ServletContextEvent sce) {
+                    // Fetch MatsFactory from ServletContext
+                    var matsFactory = (MatsFactory) sce.getServletContext()
+                            .getAttribute(MatsFactory.class.getName());
+                    // :: Sanity assert
+                    if (matsFactory == null) {
+                        throw new IllegalStateException("Missing MatsFactory in ServletContext. You may add one"
+                                + " using " + MatsExampleJettyServer.class.getSimpleName() + ".addMatsInit().");
+                    }
+
+                    LocalStatsMatsInterceptor.install((MatsInterceptable) matsFactory);
+
+                    LocalHtmlInspectForMatsFactory li = LocalHtmlInspectForMatsFactory.create(matsFactory);
+                    sce.getServletContext().setAttribute(LocalHtmlInspectForMatsFactory.class.getName(), li);
+                }
+            });
+
+            // Add Servlet that serves the LocalInspect.
+            ServletHolder servletHolder = new ServletHolder(new HttpServlet() {
+                @Override
+                protected void doGet(HttpServletRequest req,
+                        HttpServletResponse resp) throws IOException {
+                    resp.setContentType("text/html; charset=UTF-8");
+
+                    var localInspect = (LocalHtmlInspectForMatsFactory) req.getServletContext()
+                            .getAttribute(LocalHtmlInspectForMatsFactory.class.getName());
+
+                    PrintWriter out = resp.getWriter();
+
+                    out.println("<!DOCTYPE html>");
+                    out.println("<html>");
+                    out.println("  <body>");
+                    out.println("    <style>");
+                    localInspect.getStyleSheet(out); // Include just once, use the first.
+                    out.println("    </style>");
+                    out.println("    <script>");
+                    localInspect.getJavaScript(out); // Include just once, use the first.
+                    out.println("    </script>");
+                    out.println(" <a href=\".\">Back to root</a><br><br>");
+                    out.println("<h1>Embeddable Introspection GUI</h1>");
+                    localInspect.createFactoryReport(out, true, true, true);
+
+                    out.println("  </body>");
+                    out.println("</html>");
+                }
+            });
+            _webAppContext.addServlet(servletHolder, "/localinspect");
         }
 
         /**
@@ -271,32 +308,6 @@ public interface MatsExampleJettyServer {
                     System.exit(0);
                 });
             }
-        }
-
-        @Override
-        public MatsExampleJettyServer addMatsFactory(String appName) {
-            _addMatsInit_AppName = appName;
-            // .. for chaining
-            return this;
-        }
-
-        @Override
-        public MatsExampleJettyServer addMatsFactory() {
-            return addMatsFactory(_callingClass.getSimpleName());
-        }
-
-        @Override
-        public MatsExampleJettyServer addMatsLocalInspect() {
-            _addMatsLocalInspect = true;
-            // .. for chaining
-            return this;
-        }
-
-        @Override
-        public MatsExampleJettyServer setRootHtlm(String rootHtml) {
-            _rootHtlm = rootHtml;
-            // .. for chaining
-            return this;
         }
     }
 
