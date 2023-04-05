@@ -10,7 +10,6 @@ import static io.mats3.matsbrokermonitor.htmlgui.MatsBrokerMonitorHtmlGui.ACCESS
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.jms.ConnectionFactory;
@@ -55,10 +54,17 @@ public class ActiveMqRun {
         BrokerService brokerService = MatsTestBroker.newActiveMqBroker(ActiveMq.LOCALHOST, ActiveMq.SHUTDOWNHOOK);
 
         // :: Create the Jetty instance to display the MatsBrokerMonitor
-        MatsExampleJettyServer jetty = MatsExampleJettyServer.create(8000, ActiveMqRun.class);
-
-        // Start Jetty, running all SCLs and Servlets in this class.
-        jetty.start();
+        MatsExampleJettyServer.create(8000, ActiveMqRun.class)
+                .setRootHtlm("""
+                        <html><body>
+                        <h1>ActiveMQ instance, with HTTP server.</h1>
+                        <h3>Mats Broker Monitor</h3>
+                        <a href="matsbrokermonitor">MatsBrokerMonitor</a> for monitoring queues and DLQs,
+                         reissue messages<p>
+                        </body></html>
+                        """)
+                // Start Jetty, running all SCLs and Servlets in this class.
+                .start();
 
         // Just wait until Ctrl-C or equivalent.
         brokerService.waitUntilStopped();
