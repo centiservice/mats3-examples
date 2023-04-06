@@ -49,26 +49,23 @@ publishing {
 
 ext {
     version_Mats = '0.19.6-2023-03-29'
-    version_ActiveMq = '5.17.4'
-    version_Logback = '1.4.6'
-    version_ClassGraph = '4.8.157'
-    version_Jetty = '11.0.14'
-
     version_MatsBrokerMonitor = '0.1.5-2022-11-13'
 
+    version_ActiveMq = '5.17.4'
+    version_Logback = '1.4.6'
+    version_Jetty = '11.0.14'
+
+    version_Spring = '6.0.7'
+
     // Test
-    version_Jackson = '2.14.2'
     version_Junit = '4.13.2'
+    version_ClassGraph = '4.8.157'
 }
 
 dependencies {
-    api "org.apache.activemq:activemq-broker:$version_ActiveMq"
-    api "org.apache.activemq:activemq-kahadb-store:$version_ActiveMq"
-
-    api "ch.qos.logback:logback-classic:$version_Logback"
-
     api "io.mats3:mats-impl-jms:$version_Mats"
     api "io.mats3:mats-serial-json:$version_Mats"
+    api "io.mats3:mats-spring:$version_Mats"
     api "io.mats3:mats-test:$version_Mats"
     api "io.mats3:mats-localinspect:$version_Mats"
     api "io.mats3:mats-test-broker:$version_Mats"
@@ -78,13 +75,17 @@ dependencies {
     api "io.mats3.matsbrokermonitor:matsbrokermonitor-htmlgui:$version_MatsBrokerMonitor"
     api "io.mats3.matsbrokermonitor:matsbrokermonitor-jms:$version_MatsBrokerMonitor"
 
-    // :: Jetty
-    // Base Jetty Server
+    api "org.apache.activemq:activemq-broker:$version_ActiveMq"
+    api "org.apache.activemq:activemq-kahadb-store:$version_ActiveMq"
+
+    api "ch.qos.logback:logback-classic:$version_Logback"
+
     api "org.eclipse.jetty:jetty-server:$version_Jetty"
-    // .. Jetty Servlets
-    api "org.eclipse.jetty:jetty-webapp:$version_Jetty"
-    // .. Jetty: To get the @WebListener etc. annotation scanning.
-    api "org.eclipse.jetty:jetty-annotations:$version_Jetty"
+    api "org.eclipse.jetty:jetty-webapp:$version_Jetty" // Servlets
+    api "org.eclipse.jetty:jetty-annotations:$version_Jetty" // Annotations, e.g. @Servlet
+
+    api "org.springframework:spring-context:$version_Spring"
+    api "org.springframework:spring-tx:$version_Spring"
 
     // :: Testing:
     // Junit
@@ -92,7 +93,7 @@ dependencies {
 
     // :: ActiveMQ console - which I didn't manage to get running, due to JSP being awful.
     // (Attempt that didn't work out, keeping code for now)
-    // .. this needs to be present due to complile time dep in "FindActiveMqConsole"
+    // .. this needs to be present due to compile time dep in "FindActiveMqConsole"
     testImplementation "io.github.classgraph:classgraph:$version_ClassGraph"
     // testImplementation "org.apache.activemq:activemq-web-console:${version_ActiveMq}@war"
     // testImplementation "org.eclipse.jetty:apache-jsp:$version_Jetty"
