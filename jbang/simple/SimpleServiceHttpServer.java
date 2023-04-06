@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:0.0.1
+//DEPS io.mats3.examples:mats-examples:1.0.0
 
 package simple;
 
@@ -15,8 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import io.mats3.examples.MatsExampleJettyServer.FunctionalAsyncListener;
 import io.mats3.examples.MatsExampleJettyServer;
+import io.mats3.examples.MatsExampleJettyServer.FunctionalAsyncListener;
+import io.mats3.examples.MatsExampleKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
@@ -33,16 +34,17 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SimpleServiceHttpServer {
     public static void main(String... args) {
-        MatsExampleJettyServer.create(8080, SimpleServiceHttpServer.class)
-                .addMatsFactory() // Creates a MatsFactory and MatsFuturizer, using appName = calling class.
-                .addMatsLocalInspect() // Includes 'matslocalinspect' local MatsFactory Monitor
+        MatsExampleJettyServer.create(8080)
+                .addMatsFactory() // Creates a MatsFactory, using appName = calling class.
+                .addMatsFuturizer() // Creates a MatsFuturizer, using the ServletContext MatsFactory
+                .addMatsLocalInspect() // Includes 'localinspect' local MatsFactory Monitor
                 .setRootHtlm("""
                         <html><body>
                         <h1>Basic Servlet MatsFuturizer Example, sync and async, sequentially issued</h1>
                         <h3>LocalHtmlInspectForMatsFactory</h3>
                         <a href="localinspect">Monitoring/introspection GUI for the MatsFactory.</a><p>
                         <h3>Single, simple futurization:</h3>
-                        <a href="initiate_simple?count=1000">Simple sync Servlet handling, single call.</a><p>
+                        <a href="initiate_simple">Simple sync Servlet handling, single call.</a><p>
                         <h3>Multiple futurizations:</h3>
                         You should run these a few times to warm the Mats fabric JVMs.<p>
                         <a href="initiate_sync_multi?count=1000">Sync Servlet handling, 1000 calls.</a><br/>
@@ -52,7 +54,7 @@ public class SimpleServiceHttpServer {
                 .start();
     }
 
-    // ----- Simple Servlet doing a single Mats futurization, no timing or timeout handling
+    // ----- Simple Servlet doing a single Mats futurization, no timings.
 
     @WebServlet("/initiate_simple")
     public static class InitiateServlet_Simple extends HttpServlet {
@@ -80,7 +82,7 @@ public class SimpleServiceHttpServer {
 
     @WebServlet("/initiate_sync_multi")
     public static class InitiateServlet_Sync_Multi extends HttpServlet {
-        private static final Logger log = MatsTestHelp.getClassLogger();
+        private static final Logger log = MatsExampleKit.getClassLogger();
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -139,7 +141,7 @@ public class SimpleServiceHttpServer {
 
     @WebServlet(urlPatterns = "/initiate_async_multi", asyncSupported = true)
     public static class InitiateServlet_Async_Multi extends HttpServlet {
-        private static final Logger log = MatsTestHelp.getClassLogger();
+        private static final Logger log = MatsExampleKit.getClassLogger();
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

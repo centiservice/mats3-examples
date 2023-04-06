@@ -20,7 +20,7 @@ sourceSets {
 
 dependencies {
     implementation project(':mats-examples')
-    //implementation 'io.mats3.examples:mats-examples:0.0.1'
+    //implementation 'io.mats3.examples:mats-examples:1.0.0'
 }
 
 compileJava {

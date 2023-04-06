@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven=file:///home/endre/localmaven
-//DEPS io.mats3.examples:mats-examples:0.0.1
+//DEPS io.mats3.examples:mats-examples:1.0.0
 // DEPS org.apache.activemq:activemq-broker:5.16.6
 // DEPS org.apache.activemq:activemq-kahadb-store:5.16.6
 // DEPS ch.qos.logback:logback-classic:1.4.6
@@ -43,14 +43,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * destinations, lesser prefetch, split memory, DLQ expired msgs.
  * <p/>
  * Also starts a Jetty HTTP server instance, which provides access to the embeddable MatsBrokerMonitor, to inspect the
- * Mats3-relevants queues and DLQs, as well as ability to inspect messages on DLQs and reissue them.
+ * Mats3-relevants queues and DLQs, as well as ability to inspect messages, and reissue messages on DLQs.
  */
 public class ActiveMqRun {
 
     private static final Logger log = MatsTestHelp.getClassLogger();
 
     public static void main(String[] args) {
-        MatsExampleKit.configureLogbackToConsole_Debug();
+        MatsExampleKit.configureLogbackToConsole_Info();
         BrokerService brokerService = MatsTestBroker.newActiveMqBroker(ActiveMq.LOCALHOST, ActiveMq.SHUTDOWNHOOK);
 
         // :: Create the Jetty instance to display the MatsBrokerMonitor
@@ -84,11 +84,11 @@ public class ActiveMqRun {
             // NOTE: No need to do this on the same node holding the ActiveMQ, but just for convenience.
 
             // .. Create a ConnectionFactory to the ActiveMQ, going over TCP to the broker created above
-            ConnectionFactory jmsConnectionFactory = MatsExampleKit.createLocalhostActiveMqConnectionFactory();
+            ConnectionFactory jmsConnectionFactory = MatsExampleKit.createActiveMqConnectionFactory();
 
             // .. Create MatsFactory (for broadcasting of the stats to other MatsFactories)
             JmsMatsFactory<String> matsFactory = MatsExampleKit
-                    .createMatsFactory(jmsConnectionFactory, "ActiveMQ-Holder");
+                    .createMatsFactory(jmsConnectionFactory, "ActiveMqRun");
 
             // .. Create the ActiveMQ MatsBrokerMonitor
             MatsBrokerMonitor matsBrokerMonitor = ActiveMqMatsBrokerMonitor
@@ -168,7 +168,7 @@ public class ActiveMqRun {
             out.println("    </script>");
             out.println(" <a href=\".\">Back to root</a><br><br>");
 
-            out.println("<h1>MatsBrokerMonitor HTML embedded GUI</h1>");
+            out.println("<h1>ActiveMQ - MatsBrokerMonitor HTML embedded GUI</h1>");
             brokerMonitorHtmlGui.html(out, req.getParameterMap(), ACCESS_CONTROL_ALLOW_ALL);
             out.println("  </body>");
             out.println("</html>");

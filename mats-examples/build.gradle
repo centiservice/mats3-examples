@@ -8,7 +8,7 @@ repositories {
 }
 
 group = 'io.mats3.examples'
-version = '0.0.1'
+version = '1.0.0'
 
 publishing {
     //    repositories {
