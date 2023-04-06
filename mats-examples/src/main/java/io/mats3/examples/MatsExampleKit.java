@@ -34,6 +34,14 @@ import io.mats3.util.RandomString;
  * @author Endre Stølsvik 2023-03-21 22:52 - http://stolsvik.com/, endre@stolsvik.com
  */
 public class MatsExampleKit {
+    /**
+     * Creates an ActiveMQ {@link ConnectionFactory} towards localhost, and configures it with a few (optional) relevant
+     * features: Drop subscription to topic advisories, defines an exponential redelivery policy but then specifies only
+     * 1 redelivery attempt (since this is for testing, not production), and specifies nonblocking redeliveries, since
+     * Mats3 Endpoints can never rely on in-order delivery.
+     *
+     * @return
+     */
     public static ConnectionFactory createActiveMqConnectionFactory() {
         // :: Make ActiveMq JMS ConnectionFactory, towards localhost (which is default, using failover protocol)
         ActiveMQConnectionFactory jmsConnectionFactory = new ActiveMQConnectionFactory();
@@ -60,21 +68,55 @@ public class MatsExampleKit {
         return jmsConnectionFactory;
     }
 
+    /**
+     * Convenience for {@link #createMatsFactory(ConnectionFactory, String)} where the JMS {@link ConnectionFactory} is
+     * created using {@link #createActiveMqConnectionFactory()}, and the appname is deduced from the calling class (as
+     * gotten from current thread's stacktrace).
+     *
+     * @return the created MatsFactory.
+     */
     public static JmsMatsFactory<String> createMatsFactory() {
         MatsExampleKit.configureLogbackToConsole_Info();
         return createMatsFactory(getCallingClassSimpleName());
     }
 
+    /**
+     * Convenience for {@link #createMatsFactory(ConnectionFactory, String)} where the JMS {@link ConnectionFactory} is
+     * created using {@link #createActiveMqConnectionFactory()}.
+     *
+     * @param appName
+     *         what appName to use for the MatsFactory.
+     * @return the created MatsFactory.
+     */
     public static JmsMatsFactory<String> createMatsFactory(String appName) {
         MatsExampleKit.configureLogbackToConsole_Info();
         return createMatsFactory(createActiveMqConnectionFactory(), appName);
     }
 
+    /**
+     * Convenience for {@link #createMatsFactory(ConnectionFactory, String)} where the appname is deduced from the
+     * calling class (as gotten from current thread's stacktrace).
+     *
+     * @param jmsConnectionFactory
+     *         the {@link ConnectionFactory} to use for the {@link JmsMatsFactory}.
+     * @return the created MatsFactory.
+     */
     public static JmsMatsFactory<String> createMatsFactory(ConnectionFactory jmsConnectionFactory) {
         MatsExampleKit.configureLogbackToConsole_Info();
         return createMatsFactory(jmsConnectionFactory, getCallingClassSimpleName());
     }
 
+    /**
+     * Creates a JMS-transaction-only MatsFactory using the supplied JMS {@link ConnectionFactory} and app name - also
+     * adds some randomness to the node name (in addition to default hostname), so that each JVM "emulates" a different
+     * node.
+     *
+     * @param jmsConnectionFactory
+     *         the {@link ConnectionFactory} to use for the {@link JmsMatsFactory}.
+     * @param appName
+     *         what appName to use for the MatsFactory.
+     * @return the created MatsFactory.
+     */
     public static JmsMatsFactory<String> createMatsFactory(ConnectionFactory jmsConnectionFactory, String appName) {
         MatsExampleKit.configureLogbackToConsole_Info();
 
@@ -107,21 +149,43 @@ public class MatsExampleKit {
         return matsFactory;
     }
 
+    /**
+     * Configures Logback using {@link #configureLogbackToConsole(Level)}, setting root log level to DEBUG.
+     */
     public static void configureLogbackToConsole_Debug() {
         configureLogbackToConsole(Level.DEBUG);
         configureLogRemovePeriodicDebug();
     }
 
+    /**
+     * Configures Logback using {@link #configureLogbackToConsole(Level)}, setting root log level to INFO.
+     */
     public static void configureLogbackToConsole_Info() {
         configureLogbackToConsole(Level.INFO);
     }
 
+    /**
+     * Configures Logback using {@link #configureLogbackToConsole(Level)}, setting root log level to WARN.
+     */
     public static void configureLogbackToConsole_Warn() {
         configureLogbackToConsole(Level.WARN);
     }
 
     private static volatile boolean __logbackAlreadyConfigured;
 
+    /**
+     * Configures Logback, setting up a Console appender with a readable format for console (not printing the MDC unless
+     * JVM is started with '<code>-Dmdc</code>'), and sets the root logging threshold to the specified log level (but
+     * can be overridden with '<code>-D{level}</code>', where {level} can be trace, debug, info, warn, error, and
+     * no_logging).
+     * <p/>
+     * Note that it will only be configured once even in face of multiple invocations. Most methods in the Example Kit
+     * configures logging with INFO, but if you want anything else, just configure it earlier - or use the '-D{level}'
+     * functionality.
+     *
+     * @param rootLevel
+     *         the root logging threshold.
+     */
     public static void configureLogbackToConsole(Level rootLevel) {
         if (__logbackAlreadyConfigured) {
             return;
@@ -186,16 +250,36 @@ public class MatsExampleKit {
         StatusPrinter.print(context);
     }
 
+    /**
+     * Configures the log level for the specified logger name.
+     *
+     * @param loggerName
+     *         the logger for which to set the log level.
+     * @param level
+     *         what log level (threshold) the logger should have.
+     */
     public static void configureLogLevel(String loggerName, Level level) {
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerName);
         logger.setLevel(level);
     }
 
+    /**
+     * Configures the log level for the specified logger name, as gotten from the specified class.
+     *
+     * @param loggerClass
+     *         the class for which to set the log level.
+     * @param level
+     *         what log level (threshold) the logger should have.
+     */
     public static void configureLogLevel(Class<?> loggerClass, Level level) {
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerClass);
         logger.setLevel(level);
     }
 
+    /**
+     * Some parts of ActiveMQ are annoying in that they produce periodic log lines on DEBUG which add little relevant
+     * information for this exploration. Automatically invoked by {@link #configureLogbackToConsole_Debug()}.
+     */
     public static void configureLogRemovePeriodicDebug() {
         // Both of the following are annoying on the broker-side, periodically quite often outputting loglines
         configureLogLevel(Queue.class, Level.INFO);
@@ -205,6 +289,12 @@ public class MatsExampleKit {
         configureLogLevel(MessageDatabase.class, Level.INFO);
     }
 
+    /**
+     * Small helper to get a {@link Logger} for the invoking class (as gotten from a stacktrace) - is helpful for
+     * copy-pasting code!
+     *
+     * @return a Logger for the invoking class.
+     */
     public static Logger getClassLogger() {
         return LoggerFactory.getLogger(getCallingClassNameAndMethod()[0]);
     }

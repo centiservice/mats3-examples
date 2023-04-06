@@ -43,28 +43,94 @@ public interface MatsExampleJettyServer {
 
     String CONTEXT_ATTRIBUTE_PORTNUMBER = "ServerPortNumber";
 
-    MatsExampleJettyServer addMatsLocalInspect_WithRootHtml();
-
-    MatsExampleJettyServer setRootHtlm(String html);
-
+    /**
+     * Adds a {@link ServletContextListener} which adds {@link MatsFactory} to the ServletContext, so that any added
+     * Servlets may get hold of it.
+     *
+     * @param appName
+     *         the appName of the constructed {@link MatsFactory}.
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
     MatsExampleJettyServer addMatsFactory(String appName);
 
+    /**
+     * Convenience of {@link #addMatsFactory(String)}, where the appName is gotten from the calling classname (as gotten
+     * from a stacktrace).
+     *
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
     MatsExampleJettyServer addMatsFactory();
 
+    /**
+     * Adds a {@link ServletContextListener} which adds {@link MatsFuturizer} to the ServletContext, so that any added
+     * Servlets may get hold of it. Needs a {@link MatsFactory} in the ServletContext, as provided by
+     * {@link #addMatsFactory(String)}.
+     *
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
     MatsExampleJettyServer addMatsFuturizer();
 
-    MatsExampleJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer);
-
+    /**
+     * Adds a {@link ServletContextListener} and {@link HttpServlet} for providing the
+     * {@link LocalHtmlInspectForMatsFactory} local monitoring and inspection utility - also installs the
+     * {@link LocalStatsMatsInterceptor} so that the local inspect can show some rudimentary stats for the Initiators,
+     * Endpoints and Stages in the {@link MatsFactory}.
+     *
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
     MatsExampleJettyServer addMatsLocalInspect();
 
+    /**
+     * Convenience for {@link #addMatsLocalInspect()} which adds a small HTML to root using
+     * {@link #setRootHtlm(String)}.
+     *
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
+    MatsExampleJettyServer addMatsLocalInspect_WithRootHtml();
+
+    /**
+     * Provides a way to e.g. easily add Mats3 Endpoints using the ServletContext MatsFactory.
+     *
+     * @param matsFactoryConsumer
+     *         the Consumer which will be provided the ServletContext MatsFactory to work with.
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
+    MatsExampleJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer);
+
+    /**
+     * Provides a simple way to get some HTML on the "/" (root) of the Servlet Container; Installs a Servlet with path
+     * spec "", i.e. root, which outputs the provided HTML, for e.g. making a small menu.
+     *
+     * @param html
+     *         the HTML to spit out on "/" of the Servlet Container.
+     * @return this {@link MatsExampleJettyServer} for chaining.
+     */
+    MatsExampleJettyServer setRootHtlm(String html);
+
+    /**
+     * @return the Jetty {@link WebAppContext} if you want to add more to it.
+     */
     WebAppContext getWebAppContext();
 
+    /**
+     * @return the Jetty {@link Server} instance.
+     */
     Server getJettyServer();
 
+    /**
+     * Starts the Jetty Server Servlet Container, adding the features specified with the builder methods above.
+     */
     void start();
 
     // -------- IMPLEMENTATION -------------------------
 
+    /**
+     * Conveniece for {@link #create(int, Class)}, where the calling class is deduced by way of the thread stack trace.
+     *
+     * @param desiredPort
+     *         the desired port - uses this, or a higher if this is not available.
+     * @return the constructed {@link MatsExampleJettyServer}, which must be {@link #start() started} afterwards.
+     */
     static MatsExampleJettyServer create(int desiredPort) {
         // Find caller class
         String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
@@ -78,6 +144,17 @@ public interface MatsExampleJettyServer {
         return create(desiredPort, callingClass);
     }
 
+    /**
+     * Creates a {@link MatsExampleJettyServer} for the desired port (or a higher port if this is not available). You
+     * can add features using the configuration methods before invoking {@link #start()}. The calling class is added as
+     * a WEB-INF resource, so that it will be scanned for annotations.
+     *
+     * @param desiredPort
+     *         the desired port - uses this, or a higher if this is not available.
+     * @param callingClass
+     *         which class should be added as WEB-INF resource, so that it will be scanned for annotations.
+     * @return the constructed {@link MatsExampleJettyServer}, which must be {@link #start() started} afterwards.
+     */
     static MatsExampleJettyServer create(int desiredPort, Class<?> callingClass) {
         // Turn off LogBack's ServletContainerInitializer
         System.setProperty(CoreConstants.DISABLE_SERVLET_CONTAINER_INITIALIZER_KEY, "true");
