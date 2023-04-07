@@ -24,6 +24,7 @@ import ch.qos.logback.core.util.StatusPrinter;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.impl.jms.JmsMatsJmsSessionHandler_Pooling;
 import io.mats3.serial.json.MatsSerializerJson;
+import io.mats3.util.MatsFuturizer;
 import io.mats3.util.RandomString;
 
 /**
@@ -147,6 +148,32 @@ public class MatsExampleKit {
             }
         }));
         return matsFactory;
+    }
+
+    /**
+     * If you just need a Futurizer to talk to the Mats fabric on ActiveMQ on localhost, and do not need the actual
+     * {@link io.mats3.MatsFactory MatsFactory}, you can use this method to get one right away. It will employ the
+     * {@link #createMatsFactory()} to make the <code>MatsFactory</code>, which again uses
+     * {@link #createActiveMqConnectionFactory()} to get the JMS <code>ConnectionFactory</code> to localhost ActiveMQ.
+     * <p/>
+     * <b>You should never create a MatsFuturizer for a single call in production!</b>
+     * This is only usable for demonstrating interaction with the Mats fabric from a main-class. A MatsFuturizer is a
+     * singleton, long-lived service - you only need a single instance for a long-lived JVM.
+     */
+    public static MatsFuturizer createMatsFuturizer() {
+        // :: Hacking together a solution to also close MatsFactory when MatsFuturizer is closed.
+        JmsMatsFactory<String> matsFactory = createMatsFactory();
+        String endpointIdPrefix = matsFactory.getFactoryConfig().getAppName();
+        int corePoolSize = Math.max(5, matsFactory.getFactoryConfig().getConcurrency() * 4);
+        int maximumPoolSize = Math.max(100, matsFactory.getFactoryConfig().getConcurrency() * 20);
+
+        return new MatsFuturizer(matsFactory, endpointIdPrefix, corePoolSize, maximumPoolSize, 50_000) {
+            @Override
+            public void close() {
+                super.close();
+                _matsFactory.close();
+            }
+        };
     }
 
     /**
