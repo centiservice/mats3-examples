@@ -1,3 +1,8 @@
+//usr/bin/env jbang "$0" "$@" ; exit $?
+//JAVA 17
+//REPOS mavencentral,LocalMaven
+//DEPS io.mats3.examples:mats-examples:1.0.0
+
 package spring;
 
 import java.util.concurrent.CompletableFuture;

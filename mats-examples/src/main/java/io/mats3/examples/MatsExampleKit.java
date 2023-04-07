@@ -1,5 +1,6 @@
 package io.mats3.examples;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -12,6 +13,7 @@ import org.apache.activemq.store.kahadb.MessageDatabase;
 import org.apache.activemq.transport.AbstractInactivityMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -21,6 +23,8 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.InfoStatus;
 import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.util.StatusPrinter;
+import io.mats3.MatsFactory;
+import io.mats3.MatsFactory.MatsFactoryWrapper;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.impl.jms.JmsMatsJmsSessionHandler_Pooling;
 import io.mats3.serial.json.MatsSerializerJson;
@@ -174,6 +178,38 @@ public class MatsExampleKit {
                 _matsFactory.close();
             }
         };
+    }
+
+    public static AnnotationConfigApplicationContext bootSpring(Class<?>... componentClasses) {
+        // One way to do it: Manually create MatsFactory in main, then use this for Spring
+        // Could also have made it using a @Bean.
+        JmsMatsFactory<String> matsFactory = MatsExampleKit.createMatsFactory();
+
+        // Fire up Spring
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        // Register Futurizer
+        ctx.registerBean(MatsFuturizer.class, () -> MatsFuturizer.createMatsFuturizer(matsFactory));
+        // Register MatsFactory
+        // Snag: Evidently, when using registerBean, Spring's automatic 'destroy method inference' seems to only
+        // work for classes implementing Closeable or AutoCloseable. JmsMatsFactory does not, yet. Thus, specify.
+        ctx.registerBean(JmsMatsFactory.class, () -> matsFactory, bd -> bd.setDestroyMethodName("close"));
+
+        ctx.register(componentClasses);
+        ctx.refresh();
+        return ctx;
+    }
+
+    public static AnnotationConfigApplicationContext bootSpring() {
+        // Find caller class
+        String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
+        Class<?> callingClass;
+        try {
+            callingClass = Class.forName(callerclassname);
+        }
+        catch (ClassNotFoundException e) {
+            throw new AssertionError("Didn't find caller class [" + callerclassname + "].", e);
+        }
+        return bootSpring(callingClass);
     }
 
     /**

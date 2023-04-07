@@ -1,3 +1,8 @@
+//usr/bin/env jbang "$0" "$@" ; exit $?
+//JAVA 17
+//REPOS mavencentral,LocalMaven
+//DEPS io.mats3.examples:mats-examples:1.0.0
+
 package spring;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +24,14 @@ import io.mats3.spring.MatsMapping;
 @Configuration // Ensures that Spring processes inner classes, components, beans and configs
 public class SpringMediumService {
     public static void main(String... args) {
-        if (true) {
-            // One way to do it: Manually create MatsFactory in main, then use this for Spring
-            // Could also have made it using a @Bean.
-            MatsFactory matsFactory = MatsExampleKit.createMatsFactory();
-            // Fire up Spring
-            AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-            ctx.registerBean(MatsFactory.class, () -> matsFactory);
-            ctx.register(SpringMediumService.class);
-            ctx.refresh();
-        }
-        else {
-
-        }
+        // One way to do it: Manually create MatsFactory in main, then use this for Spring
+        // Could also have made it using a @Bean.
+        MatsFactory matsFactory = MatsExampleKit.createMatsFactory();
+        // Fire up Spring
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.registerBean(MatsFactory.class, () -> matsFactory);
+        ctx.register(SpringMediumService.class);
+        ctx.refresh();
     }
 
     @Service
@@ -118,5 +118,4 @@ public class SpringMediumService {
 
     record SpringMediumServiceReplyDto(double result) {
     }
-
 }
