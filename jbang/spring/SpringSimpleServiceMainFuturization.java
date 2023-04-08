@@ -22,11 +22,11 @@ import simple.SimpleServiceMainFuturization;
  * SpringConfig is performed here.
  * <p/>
  * <b>Again, as pointed out in these other main-class, single futurized calls, you should never use a MatsFuturizer in
- * this single-use way</b> - the futurizer is meant to be a singleton, long-lived object in a long-lived service.
+ * this single-use way!</b> - the futurizer is meant to be a singleton, long-lived object in a long-lived service.
  */
 public class SpringSimpleServiceMainFuturization {
     public static void main(String... args) throws ExecutionException, InterruptedException {
-        AnnotationConfigApplicationContext springContext = MatsExampleKit.bootSpring();
+        AnnotationConfigApplicationContext springContext = MatsExampleKit.startSpring();
         MatsFuturizer matsFuturizer = springContext.getBean(MatsFuturizer.class);
 
         // ----- A single call

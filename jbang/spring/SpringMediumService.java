@@ -32,6 +32,7 @@ public class SpringMediumService {
         ctx.registerBean(MatsFactory.class, () -> matsFactory);
         ctx.register(SpringMediumService.class);
         ctx.refresh();
+        // Note: SpringSimpleService instead uses a single-line MatsExampleKit to start Spring.
     }
 
     @Service

@@ -18,8 +18,9 @@ import io.mats3.examples.MatsExampleKit;
  */
 public class SimpleService {
     public static void main(String... args) {
+        // To demonstrate how a MatsFactory is made, we first get the JMS ConnectionFactory
         ConnectionFactory jmsConnectionFactory = MatsExampleKit.createActiveMqConnectionFactory();
-
+        // .. and then use that to construct the MatsFactory, on which we create..
         MatsFactory matsFactory = MatsExampleKit.createMatsFactory(jmsConnectionFactory);
 
         // ----- The Single-Stage Endpoint

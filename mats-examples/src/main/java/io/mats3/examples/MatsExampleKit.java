@@ -1,6 +1,5 @@
 package io.mats3.examples;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -23,8 +22,6 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.InfoStatus;
 import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.util.StatusPrinter;
-import io.mats3.MatsFactory;
-import io.mats3.MatsFactory.MatsFactoryWrapper;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.impl.jms.JmsMatsJmsSessionHandler_Pooling;
 import io.mats3.serial.json.MatsSerializerJson;
@@ -180,15 +177,16 @@ public class MatsExampleKit {
         };
     }
 
-    public static AnnotationConfigApplicationContext bootSpring(Class<?>... componentClasses) {
-        // One way to do it: Manually create MatsFactory in main, then use this for Spring
-        // Could also have made it using a @Bean.
+    public static AnnotationConfigApplicationContext startSpring(Class<?>... componentClasses) {
+        // Create the MatsFactory (implicitly gets the JMS ConnectionFactory)
         JmsMatsFactory<String> matsFactory = MatsExampleKit.createMatsFactory();
+        // Create the MatsFuturizer using the MatsFactory
+        MatsFuturizer matsFuturizer = MatsFuturizer.createMatsFuturizer(matsFactory);
 
         // Fire up Spring
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
         // Register Futurizer
-        ctx.registerBean(MatsFuturizer.class, () -> MatsFuturizer.createMatsFuturizer(matsFactory));
+        ctx.registerBean(MatsFuturizer.class, () -> matsFuturizer);
         // Register MatsFactory
         // Snag: Evidently, when using registerBean, Spring's automatic 'destroy method inference' seems to only
         // work for classes implementing Closeable or AutoCloseable. JmsMatsFactory does not, yet. Thus, specify.
@@ -199,7 +197,7 @@ public class MatsExampleKit {
         return ctx;
     }
 
-    public static AnnotationConfigApplicationContext bootSpring() {
+    public static AnnotationConfigApplicationContext startSpring() {
         // Find caller class
         String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
         Class<?> callingClass;
@@ -209,7 +207,7 @@ public class MatsExampleKit {
         catch (ClassNotFoundException e) {
             throw new AssertionError("Didn't find caller class [" + callerclassname + "].", e);
         }
-        return bootSpring(callingClass);
+        return startSpring(callingClass);
     }
 
     /**
