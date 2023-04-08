@@ -36,16 +36,16 @@ public class SimpleServiceMainFuturization {
 
         // ----- A single call
         CompletableFuture<Reply<SimpleServiceReplyDto>> future1 = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "TestCall.main.1", "SimpleService.simple",
+                MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.1", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(1, "TestOne"));
         log.info("######## Got reply #1! " + future1.get().getReply());
 
         // ---- Two parallel calls.
         CompletableFuture<Reply<SimpleServiceReplyDto>> future2A = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "TestCall.main.2A", "SimpleService.simple",
+                MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2A", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(20, "TestTwoA"));
         CompletableFuture<Reply<SimpleServiceReplyDto>> future2B = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "TestCall.main.2B", "SimpleService.simple",
+                MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2B", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(21, "TestTwoB"));
         log.info("######## Got reply #2A! " + future2A.get().getReply());
         log.info("######## Got reply #2B! " + future2B.get().getReply());

@@ -31,7 +31,7 @@ public class SpringSimpleServiceMainFuturization {
 
         // ----- A single call
         CompletableFuture<Reply<SimpleServiceReplyDto>> future = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "SpringMediumServiceMainCall", "SpringMediumService.matsClassMapping",
+                MatsTestHelp.traceId(), "SpringSimpleServiceMainFuturization", "SpringMediumService.matsClassMapping",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(1, "TestOne"));
 
         // Output result

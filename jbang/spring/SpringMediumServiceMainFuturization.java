@@ -26,8 +26,8 @@ public class SpringMediumServiceMainFuturization {
             // ----- A single call
             double random = ThreadLocalRandom.current().nextDouble(-10, 10);
             CompletableFuture<Reply<SpringMediumServiceReplyDto>> future = matsFuturizer.futurizeNonessential(
-                    MatsTestHelp.traceId(), "SpringMediumServiceMainCall", "SpringMediumService.matsClassMapping",
-                    SpringMediumServiceReplyDto.class,
+                    MatsTestHelp.traceId(), "SpringMediumServiceMainFuturization",
+                    "SpringMediumService.matsClassMapping", SpringMediumServiceReplyDto.class,
                     new SpringMediumServiceRequestDto(Math.PI, Math.E, random));
 
             // :: Receive, verify and print.
