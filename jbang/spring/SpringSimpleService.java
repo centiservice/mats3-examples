@@ -26,7 +26,7 @@ public class SpringSimpleService {
     // A single-stage Endpoint defined using @MatsMapping
     @MatsMapping("SimpleService.simple")
     SimpleServiceReplyDto endpoint(SimpleServiceRequestDto msg) {
-        String result = msg.string + ':' + msg.number + ":FromSingle";
+        String result = msg.string + ':' + msg.number + ":FromSimple";
         return new SimpleServiceReplyDto(result, result.length());
     }
 

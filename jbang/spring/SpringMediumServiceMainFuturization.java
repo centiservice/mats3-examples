@@ -17,7 +17,7 @@ import io.mats3.util.MatsFuturizer.Reply;
  * Exercises the {@link spring.SpringMediumService}. Note: This is most definitely not how to use a MatsFuturizer in
  * production! This is only to demonstrate a single call from a main-class.
  */
-public class SpringMediumServiceMainCall {
+public class SpringMediumServiceMainFuturization {
     public static void main(String... args) throws Exception {
         MatsExampleKit.configureLogbackToConsole_Warn();
 

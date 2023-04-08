@@ -24,7 +24,7 @@ import io.mats3.util.MatsFuturizer.Reply;
  * would not typically use this type of one-off single-invocation JVM logic. Mats3 is meant to be used as an
  * Intra-Service Communication system for multiple long-running services.
  */
-public class SimpleServiceMainCall {
+public class SimpleServiceMainFuturization {
 
     private static final Logger log = MatsExampleKit.getClassLogger();
 

@@ -26,7 +26,7 @@ public class SimpleService {
         matsFactory.single("SimpleService.simple",
                 SimpleServiceReplyDto.class, SimpleServiceRequestDto.class,
                 (processContext, msg) -> {
-                    String result = msg.string + ':' + msg.number + ":FromSingle";
+                    String result = msg.string + ':' + msg.number + ":FromSimple";
                     return new SimpleServiceReplyDto(result, result.length());
                 });
     }

@@ -14,16 +14,17 @@ import io.mats3.examples.MatsExampleKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
+import simple.SimpleServiceMainFuturization;
 
 /**
- * This is a rather meaningless Spring variant of {@link simple.SimpleServiceMainCall}, in that it does not really use
+ * This is a rather meaningless Spring variant of {@link SimpleServiceMainFuturization}, in that it does not really use
  * the Spring Context for anything other than getting the {@link MatsFuturizer} from - no bean processing or Mats3
  * SpringConfig is performed here.
  * <p/>
  * <b>Again, as pointed out in these other main-class, single futurized calls, you should never use a MatsFuturizer in
  * this single-use way</b> - the futurizer is meant to be a singleton, long-lived object in a long-lived service.
  */
-public class SpringSimpleServiceMainCall {
+public class SpringSimpleServiceMainFuturization {
     public static void main(String... args) throws ExecutionException, InterruptedException {
         AnnotationConfigApplicationContext springContext = MatsExampleKit.bootSpring();
         MatsFuturizer matsFuturizer = springContext.getBean(MatsFuturizer.class);
