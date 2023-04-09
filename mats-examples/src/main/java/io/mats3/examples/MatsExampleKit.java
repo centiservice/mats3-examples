@@ -22,6 +22,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.InfoStatus;
 import ch.qos.logback.core.status.StatusManager;
 import ch.qos.logback.core.util.StatusPrinter;
+import io.mats3.MatsFactory;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.impl.jms.JmsMatsJmsSessionHandler_Pooling;
 import io.mats3.serial.json.MatsSerializerJson;
@@ -42,7 +43,7 @@ public class MatsExampleKit {
      * 1 redelivery attempt (since this is for testing, not production), and specifies nonblocking redeliveries, since
      * Mats3 Endpoints can never rely on in-order delivery.
      *
-     * @return
+     * @return the JMS {@link ConnectionFactory} to localhost ActiveMQ.
      */
     public static ConnectionFactory createActiveMqConnectionFactory() {
         // :: Make ActiveMq JMS ConnectionFactory, towards localhost (which is default, using failover protocol)
@@ -152,14 +153,18 @@ public class MatsExampleKit {
     }
 
     /**
-     * If you just need a Futurizer to talk to the Mats fabric on ActiveMQ on localhost, and do not need the actual
-     * {@link io.mats3.MatsFactory MatsFactory}, you can use this method to get one right away. It will employ the
-     * {@link #createMatsFactory()} to make the <code>MatsFactory</code>, which again uses
-     * {@link #createActiveMqConnectionFactory()} to get the JMS <code>ConnectionFactory</code> to localhost ActiveMQ.
-     * <p/>
+     * If you just need a {@link MatsFuturizer} to talk to the Mats fabric on ActiveMQ on localhost, and do not need the
+     * actual {@link MatsFactory MatsFactory} nor the JMS {@link ConnectionFactory}, you can use this method to get one
+     * right away. It will employ the {@link #createMatsFactory()} to make the <code>MatsFactory</code>, which again
+     * uses {@link #createActiveMqConnectionFactory()} to get the JMS <code>ConnectionFactory</code> to localhost
+     * ActiveMQ.
+     * <p>
      * <b>You should never create a MatsFuturizer for a single call in production!</b>
-     * This is only usable for demonstrating interaction with the Mats fabric from a main-class. A MatsFuturizer is a
-     * singleton, long-lived service - you only need a single instance for a long-lived JVM.
+     * This method is only usable for demonstrating interaction with the Mats fabric from a main-class. A MatsFuturizer
+     * is a singleton, long-lived service - you only need a single instance for a long-lived JVM.
+     *
+     * @return a newly created {@link MatsFuturizer}, which employs a newly created {@link MatsFactory}, which employs a
+     * newly created JMS {@link ConnectionFactory}.
      */
     public static MatsFuturizer createMatsFuturizer() {
         // :: Hacking together a solution to also close MatsFactory when MatsFuturizer is closed.
@@ -177,16 +182,27 @@ public class MatsExampleKit {
         };
     }
 
+    /**
+     * Creates a Spring {@link AnnotationConfigApplicationContext}, populating it with a {@link MatsFactory} so that the
+     * annotation {@link io.mats3.spring.EnableMats @EnableMats} works, and a {@link MatsFuturizer} for simple injection
+     * when needed - the latter is lazy inited. It registers the supplied component classes, and then refreshes the
+     * context (i.e. starts it), which will "boot" any {@link io.mats3.spring.MatsMapping @MatsMapping}s and
+     * {@link io.mats3.spring.MatsClassMapping @MatsClassMapping}s.
+     *
+     * @param componentClasses
+     *         which classes should be registered as Spring component classes, both {@literal @Configuration} classes,
+     *         and {@literal @Components} and its derivatives.
+     * @return the created {@link AnnotationConfigApplicationContext}.
+     */
     public static AnnotationConfigApplicationContext startSpring(Class<?>... componentClasses) {
         // Create the MatsFactory (implicitly gets the JMS ConnectionFactory)
         JmsMatsFactory<String> matsFactory = MatsExampleKit.createMatsFactory();
-        // Create the MatsFuturizer using the MatsFactory
-        MatsFuturizer matsFuturizer = MatsFuturizer.createMatsFuturizer(matsFactory);
 
         // Fire up Spring
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-        // Register Futurizer
-        ctx.registerBean(MatsFuturizer.class, () -> matsFuturizer);
+        // Register Futurizer, lazy init bean.
+        ctx.registerBean(MatsFuturizer.class, () -> MatsFuturizer.createMatsFuturizer(matsFactory),
+                bd -> bd.setLazyInit(true));
         // Register MatsFactory
         // Snag: Evidently, when using registerBean, Spring's automatic 'destroy method inference' seems to only
         // work for classes implementing Closeable or AutoCloseable. JmsMatsFactory does not, yet. Thus, specify.
@@ -197,6 +213,13 @@ public class MatsExampleKit {
         return ctx;
     }
 
+    /**
+     * Convenience variant of {@link #startSpring(Class[])} which deduces a component class, typically a
+     * {@link org.springframework.context.annotation.Configuration @Configuration} class, from the calling class as
+     * deduced by the thread stack trace.
+     *
+     * @return the created {@link AnnotationConfigApplicationContext}.
+     */
     public static AnnotationConfigApplicationContext startSpring() {
         // Find caller class
         String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
@@ -239,7 +262,7 @@ public class MatsExampleKit {
      * JVM is started with '<code>-Dmdc</code>'), and sets the root logging threshold to the specified log level (but
      * can be overridden with '<code>-D{level}</code>', where {level} can be trace, debug, info, warn, error, and
      * no_logging).
-     * <p/>
+     * <p>
      * Note that it will only be configured once even in face of multiple invocations. Most methods in the Example Kit
      * configures logging with INFO, but if you want anything else, just configure it earlier - or use the '-D{level}'
      * functionality.

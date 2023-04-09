@@ -18,7 +18,7 @@ import io.mats3.test.MatsTestHelp;
  * flows - otherwise, another node might get the stopReceiving message. Rather, a proper service would probably store
  * some state in a service-shared database upon reception on the Terminator, thus not relying on what specific instance
  * receives it.
- * <p/>
+ * <p>
  * Requires an ActiveMQ running on localhost, and at least one instance of {@link SimpleService} and/or
  * {@link spring.SpringSimpleService} running.
  */

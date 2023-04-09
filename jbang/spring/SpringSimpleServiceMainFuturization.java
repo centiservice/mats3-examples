@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:1.0.0
+//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
 
 package spring;
 
@@ -20,7 +20,7 @@ import simple.SimpleServiceMainFuturization;
  * This is a rather meaningless Spring variant of {@link SimpleServiceMainFuturization}, in that it does not really use
  * the Spring Context for anything other than getting the {@link MatsFuturizer} from - no bean processing or Mats3
  * SpringConfig is performed here.
- * <p/>
+ * <p>
  * <b>Again, as pointed out in these other main-class, single futurized calls, you should never use a MatsFuturizer in
  * this single-use way!</b> - the futurizer is meant to be a singleton, long-lived object in a long-lived service.
  */

@@ -37,10 +37,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * Sibling to {@link MatsExampleKit} for easily setting up a Jetty server, optionally including a {@link MatsFactory}
  * and {@link MatsFuturizer} inside the ServletContext for use by Servlets.
  *
- * @author Endre Stølsvik 2023-03-27 18:41 - http://stolsvik.com/, endre@stolsvik.com
+ * @author Endre Stølsvik 2023-03-27 18:41 - <a href="http://stolsvik.com/">http://stolsvik.com/</a>, endre@stolsvik.com
  */
 public interface MatsExampleJettyServer {
 
+    /**
+     * The Jetty server's port number will be put in the {@link jakarta.servlet.ServletContext ServletContext} using
+     * this key.
+     */
     String CONTEXT_ATTRIBUTE_PORTNUMBER = "ServerPortNumber";
 
     /**
@@ -224,6 +228,9 @@ public interface MatsExampleJettyServer {
 
     // ---------------------------------
 
+    /**
+     * Default implementation of {@link MatsExampleJettyServer}.
+     */
     class MatsExampleJettyServerImpl implements MatsExampleJettyServer {
         private static final Logger log = MatsTestHelp.getClassLogger();
 
@@ -232,7 +239,7 @@ public interface MatsExampleJettyServer {
         private final Server _server;
         private final WebAppContext _webAppContext;
 
-        public MatsExampleJettyServerImpl(Class<?> callingClass, int serverPort, Server server,
+        MatsExampleJettyServerImpl(Class<?> callingClass, int serverPort, Server server,
                 WebAppContext webAppContext) {
             _callingClass = callingClass;
             _serverPort = serverPort;
@@ -526,14 +533,27 @@ public interface MatsExampleJettyServer {
 
     /**
      * Adapt the Servlet {@link AsyncListener} to a bit more modern-looking {@link FunctionalInterface}.
-     *
-     * @author Endre Stølsvik 2023-03-30 22:48 - http://stolsvik.com/, endre@stolsvik.com
      */
     @FunctionalInterface
     interface FunctionalAsyncListener {
 
+        /**
+         * The lambda which will be invoked.
+         *
+         * @param asyncEvent
+         *         the {@link AsyncEvent} emitted.
+         * @throws IOException
+         *         if an IO problem occurs when processing the async event.
+         */
         void event(AsyncEvent asyncEvent) throws IOException;
 
+        /**
+         * If you want an {@link AsyncListener} that processes {@link AsyncListener#onStartAsync(AsyncEvent)}.
+         *
+         * @param startAsyncListener
+         *         the lambda to execute when event occurs
+         * @return the wrapping {@link AsyncListener}.
+         */
         static AsyncListener onStartAsync(FunctionalAsyncListener startAsyncListener) {
             return new AsyncListener() {
                 @Override
@@ -555,7 +575,14 @@ public interface MatsExampleJettyServer {
             };
         }
 
-        static AsyncListener onComplete(FunctionalAsyncListener timeoutListener) {
+        /**
+         * If you want an {@link AsyncListener} that processes {@link AsyncListener#onComplete(AsyncEvent)}.
+         *
+         * @param completeListener
+         *         the lambda to execute when event occurs
+         * @return the wrapping {@link AsyncListener}.
+         */
+        static AsyncListener onComplete(FunctionalAsyncListener completeListener) {
             return new AsyncListener() {
                 @Override
                 public void onStartAsync(AsyncEvent event) {
@@ -563,7 +590,7 @@ public interface MatsExampleJettyServer {
 
                 @Override
                 public void onComplete(AsyncEvent event) throws IOException {
-                    timeoutListener.event(event);
+                    completeListener.event(event);
                 }
 
                 @Override
@@ -576,6 +603,13 @@ public interface MatsExampleJettyServer {
             };
         }
 
+        /**
+         * If you want an {@link AsyncListener} that processes {@link AsyncListener#onTimeout(AsyncEvent)}.
+         *
+         * @param timeoutListener
+         *         the lambda to execute when event occurs
+         * @return the wrapping {@link AsyncListener}.
+         */
         static AsyncListener onTimeout(FunctionalAsyncListener timeoutListener) {
             return new AsyncListener() {
                 @Override
@@ -597,7 +631,14 @@ public interface MatsExampleJettyServer {
             };
         }
 
-        static AsyncListener onError(FunctionalAsyncListener timeoutListener) {
+        /**
+         * If you want an {@link AsyncListener} that processes {@link AsyncListener#onError(AsyncEvent)}.
+         *
+         * @param errorListener
+         *         the lambda to execute when event occurs
+         * @return the wrapping {@link AsyncListener}.
+         */
+        static AsyncListener onError(FunctionalAsyncListener errorListener) {
             return new AsyncListener() {
                 @Override
                 public void onStartAsync(AsyncEvent event) {
@@ -613,7 +654,7 @@ public interface MatsExampleJettyServer {
 
                 @Override
                 public void onError(AsyncEvent event) throws IOException {
-                    timeoutListener.event(event);
+                    errorListener.event(event);
                 }
             };
         }

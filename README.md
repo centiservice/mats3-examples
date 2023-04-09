@@ -6,6 +6,8 @@ own solution, also handles dependencies and Java versions.
 This project aims to make it dead simple to play around and experiment with the
 <a href="https://mats3.io/">Mats<sup>3</sup></a> library.
 
+*License: Apache 2.0*
+
 This project has two pieces:
 
 1. A Maven-published project which includes "MatsExampleKit" and "MatsExampleJettyServer", to simply, with very few

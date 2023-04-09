@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven=file:///home/endre/localmaven
-//DEPS io.mats3.examples:mats-examples:1.0.0
+//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
 // DEPS org.apache.activemq:activemq-broker:5.16.6
 // DEPS org.apache.activemq:activemq-kahadb-store:5.16.6
 // DEPS ch.qos.logback:logback-classic:1.4.6
@@ -41,7 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * Starts an ActiveMQ instance on standard port 61616. "Mats3 optimized", but you can also use clean distro. Configured
  * features, ordered with most important first: Include Stats plugin, Individual DLQs, Prioritized messages, GC inactive
  * destinations, lesser prefetch, split memory, DLQ expired msgs.
- * <p/>
+ * <p>
  * Also starts a Jetty HTTP server instance, which provides access to the embeddable MatsBrokerMonitor, to inspect the
  * Mats3-relevants queues and DLQs, as well as ability to inspect messages, and reissue messages on DLQs.
  */

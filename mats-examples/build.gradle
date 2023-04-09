@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
 
 repositories {
@@ -8,43 +9,16 @@ repositories {
 }
 
 group = 'io.mats3.examples'
-version = '1.0.0'
+version = 'RC0-1.0.0'
 
-publishing {
-    //    repositories {
-    //        maven {
-    //            url "~/mats3-examples-localmaven"
-    //            name "LocalMaven"
-    //        }
-    //    }
-    publications {
-        mavenJava(MavenPublication) {
-            pom {
-                name = 'Mats Examples'
-                description = 'Tooling to create simple Mats3 examples'
-                url = 'https://github.com/centiservice/mats-examples'
-                licenses {
-                    license {
-                        name = 'PolyForm Perimeter License 1.0.0 with examples'
-                        url = 'https://github.com/centiservice/matssocket/blob/main/LICENSE.md'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'stolsvik'
-                        name = 'Endre Stølsvik'
-                        email = 'endre@stolsvik.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:https://github.com/centiservice/matssocket.git'
-                    developerConnection = 'scm:git:ssh://github.com:centiservice/matssocket.git'
-                    url = 'https://github.com/centiservice/matssocket'
-                }
-            }
-            from components.java
-        }
-    }
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 ext {
@@ -106,7 +80,64 @@ dependencies {
 
 }
 
-compileJava {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+signing {
+    sign publishing.publications
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Mats^3 Examples'
+                description = 'Tooling to create simple Mats3 examples, plus a bunch of JBang examples'
+                url = 'https://github.com/centiservice/mats-examples'
+                licenses {
+                    license {
+                        name = 'Apache 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'stolsvik'
+                        name = 'Endre Stølsvik'
+                        email = 'endre@stolsvik.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/centiservice/mats-examples.git'
+                    developerConnection = 'scm:git:ssh://github.com:centiservice/mats-examples.git'
+                    url = 'https://github.com/centiservice/mats-examples'
+                }
+            }
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name 'SonatypeOSSRHSnapshot'
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+            credentials {
+                // using findProperty(..) to be able to build without it being defined.
+                username findProperty('sonatypeUsername') as String ?: "should be in different file"
+                password findProperty('sonatypePassword') as String ?: "should be in different file"
+            }
+        }
+        maven {
+            name 'SonatypeOSSRHStaging'
+            url 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2'
+            credentials {
+                // using findProperty(..) to be able to build without it being defined.
+                username findProperty('sonatypeUsername') as String ?: "should be in different file"
+                password findProperty('sonatypePassword') as String ?: "should be in different file"
+            }
+        }
+    }
+}
+
+// Publishing "aliases"
+// Publish to MavenLocal (.m2)
+task matsPublishLocal(dependsOn: [publishToMavenLocal])
+// Publish to Sonatype's OSSRH (OSS Repository Hosting), Snapshot and Staging
+task matsPublishSnapshot(dependsOn: [publishAllPublicationsToSonatypeOSSRHSnapshotRepository])
+task matsPublishStaging(dependsOn: [publishAllPublicationsToSonatypeOSSRHStagingRepository])
