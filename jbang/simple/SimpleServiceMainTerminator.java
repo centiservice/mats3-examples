@@ -25,6 +25,10 @@ import io.mats3.test.MatsTestHelp;
  * <p>
  * Requires an ActiveMQ running on localhost, and at least one instance of {@link SimpleService} and/or
  * {@link spring.SpringSimpleService} running.
+ * <p>
+ * You may invoke it with "-Ddrain" to let the receiver linger 10 seconds more to drain the queue if it has ended up
+ * with multiple sets of messages, for example if you invoked it multiple times while no process was consuming messages
+ * from 'SimpleService.simple'.
  */
 public class SimpleServiceMainTerminator {
 
@@ -53,11 +57,13 @@ public class SimpleServiceMainTerminator {
         // :: Initiate a bunch of Request messages to the SimpleService, with ReplyTo set to the above Terminator.
         // Lastly, a message with state "stopReceiver=true" is added, which the Terminator sees and counts down the
         // latch, letting the main thread (this thread) continue. All these are sent in a single transaction, but
-        // will be processed by the running (Spring)SimpleService instances one by one, transactionally. Since sequence
-        // order is specifically not guaranteed with Mats3, this message might "bypass" some of the other messages,
-        // stopping the receiver before all messages have been processed. If this happens, you should see the "left
-        // over" messages on the MatsBrokerMonitor. If you start up this main-class again, you'd then get those queued
-        // messages that wasn't processed on the previous incarnation.
+        // will be processed by the running (Spring)SimpleService instances transactionally one by one. Since sequence
+        // order is specifically not guaranteed with Mats3, the 'stopReceiver=true'-message might "overtake" some of the
+        // other messages, stopping the receiver before all messages have been processed. If this happens, you should
+        // see the "left over" messages on the MatsBrokerMonitor. If you start up this main-class again, you'd then get
+        // those queued messages that wasn't processed on the previous incarnation. If you want to drain the queue,
+        // even though there are multiple 'stopReceiver=true'-messages (e.g. you've started this multiple times with
+        // no 'SimpleService.simple' running), invoke it with "-Ddrain", and it'll receive for 10 seconds more.
         MatsInitiator initiator = matsFactory.getDefaultInitiator();
         initiator.initiate(init -> {
             for (int i = 0; i < 500; i++) {
@@ -76,13 +82,20 @@ public class SimpleServiceMainTerminator {
                     .request(new SimpleServiceRequestDto(2, "two"));
         });
 
-        boolean await = latch.await(10, TimeUnit.SECONDS);
+        boolean await = latch.await(30, TimeUnit.SECONDS);
         if (await) {
             log.info("Got pinged by Terminator that it has received the stopReceiver message.");
         }
         else {
             log.error("Didn't get the stopReceiver message: Timeout (some other concurrently running node got it?).");
         }
+
+        // ?: Have the jbang file been invoked with "-Ddrain"?
+        if (System.getProperty("drain") != null) {
+            log.info("Sleeping 10 seconds to drain the queue.");
+            Thread.sleep(10_000);
+        }
+
         log.info("Number of messages received: " + counter);
 
         // :: Clean up to exit.
