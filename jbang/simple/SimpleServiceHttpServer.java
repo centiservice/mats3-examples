@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package simple;
 
@@ -15,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import io.mats3.examples.MatsExampleJettyServer;
-import io.mats3.examples.MatsExampleJettyServer.FunctionalAsyncListener;
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangJettyServer;
+import io.mats3.examples.MatsJbangJettyServer.FunctionalAsyncListener;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
@@ -34,7 +34,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SimpleServiceHttpServer {
     public static void main(String... args) {
-        MatsExampleJettyServer.create(8080)
+        MatsJbangJettyServer.create(8080)
                 .addMatsFactory() // Creates a MatsFactory, using appName = calling class.
                 .addMatsFuturizer() // Creates a MatsFuturizer, using the ServletContext MatsFactory
                 .addMatsLocalInspect() // Includes 'localinspect' local MatsFactory Monitor
@@ -82,7 +82,7 @@ public class SimpleServiceHttpServer {
 
     @WebServlet("/initiate_sync_multi")
     public static class InitiateServlet_Sync_Multi extends HttpServlet {
-        private static final Logger log = MatsExampleKit.getClassLogger();
+        private static final Logger log = MatsJbangKit.getClassLogger();
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -141,7 +141,7 @@ public class SimpleServiceHttpServer {
 
     @WebServlet(urlPatterns = "/initiate_async_multi", asyncSupported = true)
     public static class InitiateServlet_Async_Multi extends HttpServlet {
-        private static final Logger log = MatsExampleKit.getClassLogger();
+        private static final Logger log = MatsJbangKit.getClassLogger();
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

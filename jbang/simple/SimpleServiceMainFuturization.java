@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package simple;
 
@@ -12,7 +12,7 @@ import javax.jms.ConnectionFactory;
 import org.slf4j.Logger;
 
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
@@ -26,12 +26,12 @@ import io.mats3.util.MatsFuturizer.Reply;
  */
 public class SimpleServiceMainFuturization {
 
-    private static final Logger log = MatsExampleKit.getClassLogger();
+    private static final Logger log = MatsJbangKit.getClassLogger();
 
     public static void main(String... args) throws Exception {
         // :: Create a JMS ConnectionFactory, MatsFactory and MatsFuturizer to demonstrate the setup.
-        ConnectionFactory jmsConnectionFactory = MatsExampleKit.createActiveMqConnectionFactory();
-        MatsFactory matsFactory = MatsExampleKit.createMatsFactory(jmsConnectionFactory);
+        ConnectionFactory jmsConnectionFactory = MatsJbangKit.createActiveMqConnectionFactory();
+        MatsFactory matsFactory = MatsJbangKit.createMatsFactory(jmsConnectionFactory);
         MatsFuturizer matsFuturizer = MatsFuturizer.createMatsFuturizer(matsFactory);
 
         // ----- A single call

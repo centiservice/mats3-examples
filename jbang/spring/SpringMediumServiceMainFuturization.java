@@ -1,14 +1,14 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package spring;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
@@ -19,10 +19,10 @@ import io.mats3.util.MatsFuturizer.Reply;
  */
 public class SpringMediumServiceMainFuturization {
     public static void main(String... args) throws Exception {
-        MatsExampleKit.configureLogbackToConsole_Warn();
+        MatsJbangKit.configureLogbackToConsole_Warn();
 
         // NOTE: NEVER do this in production! MatsFuturizer is a singleton, long-lived service!
-        try (MatsFuturizer matsFuturizer = MatsExampleKit.createMatsFuturizer()) {
+        try (MatsFuturizer matsFuturizer = MatsJbangKit.createMatsFuturizer()) {
             // ----- A single call
             double random = ThreadLocalRandom.current().nextDouble(-10, 10);
             CompletableFuture<Reply<SpringMediumServiceReplyDto>> future = matsFuturizer.futurizeNonessential(

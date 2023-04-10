@@ -30,13 +30,13 @@ import io.mats3.util.MatsFuturizer;
 import io.mats3.util.RandomString;
 
 /**
- * This class, along with {@link MatsExampleJettyServer}, offers a set of tools for easy setup of a Mats3 Endpoint or
+ * This class, along with {@link MatsJbangJettyServer}, offers a set of tools for easy setup of a Mats3 Endpoint or
  * client, with an optional HTTP server (Jetty). The aim is to minimize infrastructure and boilerplate code, allowing
  * you to focus on exploring Mats3's features without worrying about the setup process.
  *
  * @author Endre Stølsvik 2023-03-21 22:52 - http://stolsvik.com/, endre@stolsvik.com
  */
-public class MatsExampleKit {
+public class MatsJbangKit {
     /**
      * Creates an ActiveMQ {@link ConnectionFactory} towards localhost, and configures it with a few (optional) relevant
      * features: Drop subscription to topic advisories, defines an exponential redelivery policy but then specifies only
@@ -79,7 +79,7 @@ public class MatsExampleKit {
      * @return the created MatsFactory.
      */
     public static JmsMatsFactory<String> createMatsFactory() {
-        MatsExampleKit.configureLogbackToConsole_Info();
+        MatsJbangKit.configureLogbackToConsole_Info();
         return createMatsFactory(getCallingClassSimpleName());
     }
 
@@ -92,7 +92,7 @@ public class MatsExampleKit {
      * @return the created MatsFactory.
      */
     public static JmsMatsFactory<String> createMatsFactory(String appName) {
-        MatsExampleKit.configureLogbackToConsole_Info();
+        MatsJbangKit.configureLogbackToConsole_Info();
         return createMatsFactory(createActiveMqConnectionFactory(), appName);
     }
 
@@ -105,7 +105,7 @@ public class MatsExampleKit {
      * @return the created MatsFactory.
      */
     public static JmsMatsFactory<String> createMatsFactory(ConnectionFactory jmsConnectionFactory) {
-        MatsExampleKit.configureLogbackToConsole_Info();
+        MatsJbangKit.configureLogbackToConsole_Info();
         return createMatsFactory(jmsConnectionFactory, getCallingClassSimpleName());
     }
 
@@ -121,7 +121,7 @@ public class MatsExampleKit {
      * @return the created MatsFactory.
      */
     public static JmsMatsFactory<String> createMatsFactory(ConnectionFactory jmsConnectionFactory, String appName) {
-        MatsExampleKit.configureLogbackToConsole_Info();
+        MatsJbangKit.configureLogbackToConsole_Info();
 
         // :: Make the JMS-based MatsFactory, providing the JMS ConnectionFactory
         JmsMatsFactory<String> matsFactory = JmsMatsFactory.createMatsFactory_JmsOnlyTransactions(appName, "#examples#",
@@ -196,7 +196,7 @@ public class MatsExampleKit {
      */
     public static AnnotationConfigApplicationContext startSpring(Class<?>... componentClasses) {
         // Create the MatsFactory (implicitly gets the JMS ConnectionFactory)
-        JmsMatsFactory<String> matsFactory = MatsExampleKit.createMatsFactory();
+        JmsMatsFactory<String> matsFactory = MatsJbangKit.createMatsFactory();
 
         // Fire up Spring
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -222,7 +222,7 @@ public class MatsExampleKit {
      */
     public static AnnotationConfigApplicationContext startSpring() {
         // Find caller class
-        String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
+        String callerclassname = MatsJbangKit.getCallingClassNameAndMethod()[0];
         Class<?> callingClass;
         try {
             callingClass = Class.forName(callerclassname);
@@ -329,7 +329,7 @@ public class MatsExampleKit {
         StatusManager statusManager = context.getStatusManager();
         statusManager.add(new InfoStatus("Programmatically removed existing root appenders,"
                 + " adding formatted ConsoleAppender, root Logger threshold [" + rootLevel + "].",
-                MatsExampleKit.class));
+                MatsJbangKit.class));
 
         StatusPrinter.print(context);
     }
@@ -460,7 +460,7 @@ public class MatsExampleKit {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
         for (int i = 1; i < stElements.length; i++) {
             StackTraceElement ste = stElements[i];
-            if (!ste.getClassName().startsWith(MatsExampleKit.class.getPackageName())) {
+            if (!ste.getClassName().startsWith(MatsJbangKit.class.getPackageName())) {
                 return new String[] { ste.getClassName(), ste.getMethodName() };
             }
         }

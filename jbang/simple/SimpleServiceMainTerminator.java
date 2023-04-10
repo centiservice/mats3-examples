@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 
 import io.mats3.MatsFactory;
 import io.mats3.MatsInitiator;
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 
 /**
@@ -24,7 +24,7 @@ import io.mats3.test.MatsTestHelp;
  */
 public class SimpleServiceMainTerminator {
 
-    private static final Logger log = MatsExampleKit.getClassLogger();
+    private static final Logger log = MatsJbangKit.getClassLogger();
 
     private static final class State {
         boolean stopReceiver;
@@ -34,7 +34,7 @@ public class SimpleServiceMainTerminator {
 
     public static void main(String... args) throws Exception {
         // :: Get hold of MatsFactory
-        MatsFactory matsFactory = MatsExampleKit.createMatsFactory();
+        MatsFactory matsFactory = MatsJbangKit.createMatsFactory();
 
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger counter = new AtomicInteger();

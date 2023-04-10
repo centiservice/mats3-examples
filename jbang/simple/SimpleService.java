@@ -1,14 +1,14 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package simple;
 
 import javax.jms.ConnectionFactory;
 
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 
 /**
  * A simple, Java only, main-class style, single-stage Endpoint, replying with a modified version of the request. While
@@ -19,9 +19,9 @@ import io.mats3.examples.MatsExampleKit;
 public class SimpleService {
     public static void main(String... args) {
         // To demonstrate how a MatsFactory is made, we first get the JMS ConnectionFactory
-        ConnectionFactory jmsConnectionFactory = MatsExampleKit.createActiveMqConnectionFactory();
+        ConnectionFactory jmsConnectionFactory = MatsJbangKit.createActiveMqConnectionFactory();
         // .. and then use that to construct the MatsFactory, on which we create..
-        MatsFactory matsFactory = MatsExampleKit.createMatsFactory(jmsConnectionFactory);
+        MatsFactory matsFactory = MatsJbangKit.createMatsFactory(jmsConnectionFactory);
 
         // ----- The Single-Stage Endpoint
         matsFactory.single("SimpleService.simple",

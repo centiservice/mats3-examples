@@ -1,13 +1,13 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package stdexample;
 
 import io.mats3.MatsEndpoint;
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsExampleJettyServer;
+import io.mats3.examples.MatsJbangJettyServer;
 
 /**
  * Vulgarly complex Mats Endpoint to calculate <code>a*b - (c/d + e)</code>, consisting of three stages. Utilizes
@@ -15,7 +15,7 @@ import io.mats3.examples.MatsExampleJettyServer;
  */
 public class ServiceA {
     public static void main(String... args) {
-        MatsExampleJettyServer.create(9010)
+        MatsJbangJettyServer.create(9010)
                 .addMatsFactory()
                 .setupUsingMatsFactory(ServiceA::setupEndpoint)
                 .addMatsLocalInspect_WithRootHtml()

@@ -1,7 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package spring;
 
@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
@@ -26,7 +26,7 @@ import simple.SimpleServiceMainFuturization;
  */
 public class SpringSimpleServiceMainFuturization {
     public static void main(String... args) throws ExecutionException, InterruptedException {
-        AnnotationConfigApplicationContext springContext = MatsExampleKit.startSpring();
+        AnnotationConfigApplicationContext springContext = MatsJbangKit.startSpring();
         MatsFuturizer matsFuturizer = springContext.getBean(MatsFuturizer.class);
 
         // ----- A single call

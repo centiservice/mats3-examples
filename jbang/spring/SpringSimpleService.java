@@ -1,13 +1,13 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package spring;
 
 import org.springframework.context.annotation.Configuration;
 
-import io.mats3.examples.MatsExampleKit;
+import io.mats3.examples.MatsJbangKit;
 import io.mats3.spring.EnableMats;
 import io.mats3.spring.MatsMapping;
 
@@ -20,7 +20,7 @@ import io.mats3.spring.MatsMapping;
 @Configuration // Ensures that Spring processes inner classes, components, beans and configs
 public class SpringSimpleService {
     public static void main(String... args) {
-        MatsExampleKit.startSpring();
+        MatsJbangKit.startSpring();
     }
 
     // A single-stage Endpoint defined using @MatsMapping

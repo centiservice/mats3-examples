@@ -1,12 +1,12 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
 //REPOS mavencentral,LocalMaven
-//DEPS io.mats3.examples:mats-examples:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 package stdexample;
 
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsExampleJettyServer;
+import io.mats3.examples.MatsJbangJettyServer;
 
 /**
  * Mats single-stage Endpoint which calculates <code>a*b</code>. A single Endpoint is a convenience method of creating a
@@ -15,7 +15,7 @@ import io.mats3.examples.MatsExampleJettyServer;
  */
 public class ServiceB {
     public static void main(String... args) {
-        MatsExampleJettyServer.create(9020)
+        MatsJbangJettyServer.create(9020)
                 .addMatsFactory()
                 .setupUsingMatsFactory(ServiceB::setupEndpoint)
                 .addMatsLocalInspect_WithRootHtml()

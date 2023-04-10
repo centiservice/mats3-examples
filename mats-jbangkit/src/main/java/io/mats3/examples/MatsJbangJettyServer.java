@@ -34,12 +34,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Sibling to {@link MatsExampleKit} for easily setting up a Jetty server, optionally including a {@link MatsFactory}
+ * Sibling to {@link MatsJbangKit} for easily setting up a Jetty server, optionally including a {@link MatsFactory}
  * and {@link MatsFuturizer} inside the ServletContext for use by Servlets.
  *
  * @author Endre Stølsvik 2023-03-27 18:41 - <a href="http://stolsvik.com/">http://stolsvik.com/</a>, endre@stolsvik.com
  */
-public interface MatsExampleJettyServer {
+public interface MatsJbangJettyServer {
 
     /**
      * The Jetty server's port number will be put in the {@link jakarta.servlet.ServletContext ServletContext} using
@@ -53,26 +53,26 @@ public interface MatsExampleJettyServer {
      *
      * @param appName
      *         the appName of the constructed {@link MatsFactory}.
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer addMatsFactory(String appName);
+    MatsJbangJettyServer addMatsFactory(String appName);
 
     /**
      * Convenience of {@link #addMatsFactory(String)}, where the appName is gotten from the calling classname (as gotten
      * from a stacktrace).
      *
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer addMatsFactory();
+    MatsJbangJettyServer addMatsFactory();
 
     /**
      * Adds a {@link ServletContextListener} which adds {@link MatsFuturizer} to the ServletContext, so that any added
      * Servlets may get hold of it. Needs a {@link MatsFactory} in the ServletContext, as provided by
      * {@link #addMatsFactory(String)}.
      *
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer addMatsFuturizer();
+    MatsJbangJettyServer addMatsFuturizer();
 
     /**
      * Adds a {@link ServletContextListener} and {@link HttpServlet} for providing the
@@ -80,26 +80,26 @@ public interface MatsExampleJettyServer {
      * {@link LocalStatsMatsInterceptor} so that the local inspect can show some rudimentary stats for the Initiators,
      * Endpoints and Stages in the {@link MatsFactory}.
      *
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer addMatsLocalInspect();
+    MatsJbangJettyServer addMatsLocalInspect();
 
     /**
      * Convenience for {@link #addMatsLocalInspect()} which adds a small HTML to root using
      * {@link #setRootHtlm(String)}.
      *
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer addMatsLocalInspect_WithRootHtml();
+    MatsJbangJettyServer addMatsLocalInspect_WithRootHtml();
 
     /**
      * Provides a way to e.g. easily add Mats3 Endpoints using the ServletContext MatsFactory.
      *
      * @param matsFactoryConsumer
      *         the Consumer which will be provided the ServletContext MatsFactory to work with.
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer);
+    MatsJbangJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer);
 
     /**
      * Provides a simple way to get some HTML on the "/" (root) of the Servlet Container; Installs a Servlet with path
@@ -107,9 +107,9 @@ public interface MatsExampleJettyServer {
      *
      * @param html
      *         the HTML to spit out on "/" of the Servlet Container.
-     * @return this {@link MatsExampleJettyServer} for chaining.
+     * @return this {@link MatsJbangJettyServer} for chaining.
      */
-    MatsExampleJettyServer setRootHtlm(String html);
+    MatsJbangJettyServer setRootHtlm(String html);
 
     /**
      * @return the Jetty {@link WebAppContext} if you want to add more to it.
@@ -133,11 +133,11 @@ public interface MatsExampleJettyServer {
      *
      * @param desiredPort
      *         the desired port - uses this, or a higher if this is not available.
-     * @return the constructed {@link MatsExampleJettyServer}, which must be {@link #start() started} afterwards.
+     * @return the constructed {@link MatsJbangJettyServer}, which must be {@link #start() started} afterwards.
      */
-    static MatsExampleJettyServer create(int desiredPort) {
+    static MatsJbangJettyServer create(int desiredPort) {
         // Find caller class
-        String callerclassname = MatsExampleKit.getCallingClassNameAndMethod()[0];
+        String callerclassname = MatsJbangKit.getCallingClassNameAndMethod()[0];
         Class<?> callingClass;
         try {
             callingClass = Class.forName(callerclassname);
@@ -149,7 +149,7 @@ public interface MatsExampleJettyServer {
     }
 
     /**
-     * Creates a {@link MatsExampleJettyServer} for the desired port (or a higher port if this is not available). You
+     * Creates a {@link MatsJbangJettyServer} for the desired port (or a higher port if this is not available). You
      * can add features using the configuration methods before invoking {@link #start()}. The calling class is added as
      * a WEB-INF resource, so that it will be scanned for annotations.
      *
@@ -157,17 +157,17 @@ public interface MatsExampleJettyServer {
      *         the desired port - uses this, or a higher if this is not available.
      * @param callingClass
      *         which class should be added as WEB-INF resource, so that it will be scanned for annotations.
-     * @return the constructed {@link MatsExampleJettyServer}, which must be {@link #start() started} afterwards.
+     * @return the constructed {@link MatsJbangJettyServer}, which must be {@link #start() started} afterwards.
      */
-    static MatsExampleJettyServer create(int desiredPort, Class<?> callingClass) {
+    static MatsJbangJettyServer create(int desiredPort, Class<?> callingClass) {
         // Turn off LogBack's ServletContainerInitializer
         System.setProperty(CoreConstants.DISABLE_SERVLET_CONTAINER_INITIALIZER_KEY, "true");
         // Configure Logback
-        MatsExampleKit.configureLogbackToConsole_Info();
+        MatsJbangKit.configureLogbackToConsole_Info();
 
-        final Logger log = LoggerFactory.getLogger(MatsExampleJettyServer.class);
+        final Logger log = LoggerFactory.getLogger(MatsJbangJettyServer.class);
 
-        int port = MatsExampleKit.findAvailablePortAtOrUpwardsOf(desiredPort, 10);
+        int port = MatsJbangKit.findAvailablePortAtOrUpwardsOf(desiredPort, 10);
         if (port != desiredPort) {
             log.warn("NOTE: For JettyServer: Had to increase the port from [" + desiredPort + "] to [" + port + "].");
         }
@@ -188,7 +188,7 @@ public interface MatsExampleJettyServer {
         // :: Get Jetty to Scan project classes too: https://stackoverflow.com/a/26220672/39334
         List<Resource> resources = new ArrayList<>();
         // Find location for this class
-        resources.add(Resource.newResource(MatsExampleKit.class.getProtectionDomain().getCodeSource().getLocation()));
+        resources.add(Resource.newResource(MatsJbangKit.class.getProtectionDomain().getCodeSource().getLocation()));
         // ?: Did we get a calling class?
         if (callingClass != null) {
             // -> Yes, so add this one too.
@@ -223,15 +223,15 @@ public interface MatsExampleJettyServer {
         // :: Graceful shutdown, and stop at shutdown
         server.setStopTimeout(5000);
         server.setStopAtShutdown(true);
-        return new MatsExampleJettyServerImpl(callingClass, port, server, webAppContext);
+        return new MatsJbangJettyServerImpl(callingClass, port, server, webAppContext);
     }
 
     // ---------------------------------
 
     /**
-     * Default implementation of {@link MatsExampleJettyServer}.
+     * Default implementation of {@link MatsJbangJettyServer}.
      */
-    class MatsExampleJettyServerImpl implements MatsExampleJettyServer {
+    class MatsJbangJettyServerImpl implements MatsJbangJettyServer {
         private static final Logger log = MatsTestHelp.getClassLogger();
 
         private final Class<?> _callingClass;
@@ -239,7 +239,7 @@ public interface MatsExampleJettyServer {
         private final Server _server;
         private final WebAppContext _webAppContext;
 
-        MatsExampleJettyServerImpl(Class<?> callingClass, int serverPort, Server server,
+        MatsJbangJettyServerImpl(Class<?> callingClass, int serverPort, Server server,
                 WebAppContext webAppContext) {
             _callingClass = callingClass;
             _serverPort = serverPort;
@@ -257,40 +257,40 @@ public interface MatsExampleJettyServer {
         private String _rootHtlm;
 
         @Override
-        public MatsExampleJettyServer addMatsFactory(String appName) {
+        public MatsJbangJettyServer addMatsFactory(String appName) {
             _addMatsFactory_AppName = appName;
             // .. for chaining
             return this;
         }
 
         @Override
-        public MatsExampleJettyServer addMatsFactory() {
+        public MatsJbangJettyServer addMatsFactory() {
             return addMatsFactory(_callingClass.getSimpleName());
         }
 
         @Override
-        public MatsExampleJettyServer addMatsFuturizer() {
+        public MatsJbangJettyServer addMatsFuturizer() {
             _addMatsFuturizer = true;
             // .. for chaining
             return this;
         }
 
         @Override
-        public MatsExampleJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer) {
+        public MatsJbangJettyServer setupUsingMatsFactory(Consumer<MatsFactory> matsFactoryConsumer) {
             _matsFactoryConsumer = matsFactoryConsumer;
             // .. for chaining
             return this;
         }
 
         @Override
-        public MatsExampleJettyServer addMatsLocalInspect() {
+        public MatsJbangJettyServer addMatsLocalInspect() {
             _addMatsLocalInspect = true;
             // .. for chaining
             return this;
         }
 
         @Override
-        public MatsExampleJettyServer addMatsLocalInspect_WithRootHtml() {
+        public MatsJbangJettyServer addMatsLocalInspect_WithRootHtml() {
             addMatsLocalInspect();
             setRootHtlm("""
                     <html><body>
@@ -305,7 +305,7 @@ public interface MatsExampleJettyServer {
         }
 
         @Override
-        public MatsExampleJettyServer setRootHtlm(String rootHtml) {
+        public MatsJbangJettyServer setRootHtlm(String rootHtml) {
             _rootHtlm = rootHtml;
             // .. for chaining
             return this;
@@ -386,7 +386,7 @@ public interface MatsExampleJettyServer {
                 @Override
                 public void contextInitialized(ServletContextEvent sce) {
                     // Create the MatsFactory and then MatsFuturizer
-                    _matsFactory = MatsExampleKit.createMatsFactory(_addMatsFactory_AppName);
+                    _matsFactory = MatsJbangKit.createMatsFactory(_addMatsFactory_AppName);
                     // Put these in the ServletContext, so that the Servlets can get hold of it.
                     sce.getServletContext().setAttribute(MatsFactory.class.getName(), _matsFactory);
                 }
@@ -413,7 +413,7 @@ public interface MatsExampleJettyServer {
                     // :: Sanity assert
                     if (matsFactory == null) {
                         throw new IllegalStateException("Missing MatsFactory in ServletContext. You may add one"
-                                + " using '" + MatsExampleJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
+                                + " using '" + MatsJbangJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
                     }
                     _matsFuturizer = MatsFuturizer.createMatsFuturizer(matsFactory);
                     // Put these in the ServletContext, so that the Servlets can get hold of it.
@@ -440,7 +440,7 @@ public interface MatsExampleJettyServer {
                     // :: Sanity assert
                     if (matsFactory == null) {
                         throw new IllegalStateException("Missing MatsFactory in ServletContext. You may add one"
-                                + " using '" + MatsExampleJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
+                                + " using '" + MatsJbangJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
                     }
 
                     _matsFactoryConsumer.accept(matsFactory);
@@ -458,7 +458,7 @@ public interface MatsExampleJettyServer {
                     // :: Sanity assert
                     if (matsFactory == null) {
                         throw new IllegalStateException("Missing MatsFactory in ServletContext. You may add one"
-                                + " using '" + MatsExampleJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
+                                + " using '" + MatsJbangJettyServer.class.getSimpleName() + ".addMatsFactory()'.");
                     }
 
                     LocalStatsMatsInterceptor.install((MatsInterceptable) matsFactory);
