@@ -1,10 +1,7 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//REPOS mavencentral,LocalMaven=file:///home/endre/localmaven
+//REPOS mavencentral,LocalMaven
 //DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
-// DEPS org.apache.activemq:activemq-broker:5.16.6
-// DEPS org.apache.activemq:activemq-kahadb-store:5.16.6
-// DEPS ch.qos.logback:logback-classic:1.4.6
 
 import static io.mats3.matsbrokermonitor.htmlgui.MatsBrokerMonitorHtmlGui.ACCESS_CONTROL_ALLOW_ALL;
 
