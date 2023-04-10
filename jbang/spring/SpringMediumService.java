@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package spring;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import io.mats3.MatsEndpoint.ProcessContext;
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.spring.EnableMats;
 import io.mats3.spring.MatsClassMapping;
 import io.mats3.spring.MatsClassMapping.Stage;
@@ -26,7 +26,7 @@ public class SpringMediumService {
         // One way to do it: Manually create MatsFactory in main, then use this for Spring
         // Could also have made it using a @Bean.
         MatsFactory matsFactory = MatsJbangKit.createMatsFactory();
-        // Fire up Spring
+        // Fire up Spring, manually
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
         ctx.registerBean(MatsFactory.class, () -> matsFactory);
         ctx.register(SpringMediumService.class);
@@ -55,8 +55,7 @@ public class SpringMediumService {
 
     /**
      * An interface for a "Service", which is required by the @MatsClassMapping later, and provided by a
-     *
-     * @Bean in a @Configuration.
+     * {@code @Bean} in the {@code @Configuration} class below, {@link TestConfiguration}.
      */
     interface ExponentiationService {
         double exponentiate(double base, double exponent);

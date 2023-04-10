@@ -1,20 +1,18 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package simple;
 
-import java.util.concurrent.CompletableFuture;
-
-import javax.jms.ConnectionFactory;
-
-import org.slf4j.Logger;
-
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
+import org.slf4j.Logger;
+
+import javax.jms.ConnectionFactory;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A main-class which fires up a JMS ConnectionFactory, a MatsFactory, a MatsFuturizer, and then calls the
@@ -37,17 +35,22 @@ public class SimpleServiceMainFuturization {
         CompletableFuture<Reply<SimpleServiceReplyDto>> future1 = matsFuturizer.futurizeNonessential(
                 MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.1", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(1, "TestOne"));
+        // Sync wait for the reply
         log.info("######## Got reply #1! " + future1.get().getReply());
 
-        // ---- Two parallel calls.
-        CompletableFuture<Reply<SimpleServiceReplyDto>> future2A = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2A", "SimpleService.simple",
-                SimpleServiceReplyDto.class, new SimpleServiceRequestDto(20, "TestTwoA"));
-        CompletableFuture<Reply<SimpleServiceReplyDto>> future2B = matsFuturizer.futurizeNonessential(
-                MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2B", "SimpleService.simple",
-                SimpleServiceReplyDto.class, new SimpleServiceRequestDto(21, "TestTwoB"));
-        log.info("######## Got reply #2A! " + future2A.get().getReply());
-        log.info("######## Got reply #2B! " + future2B.get().getReply());
+        // ---- Two parallel calls, async wait for reply
+        var wait2A = matsFuturizer.futurizeNonessential(
+                        MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2A", "SimpleService.simple",
+                        SimpleServiceReplyDto.class, new SimpleServiceRequestDto(20, "TestTwoA"))
+                .thenAccept(reply -> log.info("######## Got reply #2A! " + reply.getReply()));
+
+        var wait2B = matsFuturizer.futurizeNonessential(
+                        MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2B", "SimpleService.simple",
+                        SimpleServiceReplyDto.class, new SimpleServiceRequestDto(21, "TestTwoB"))
+                .thenAccept(reply -> log.info("######## Got reply #2B! " + reply.getReply()));
+
+        wait2A.join();
+        wait2B.join();
 
         // :: Clean up to exit.
         matsFuturizer.close();

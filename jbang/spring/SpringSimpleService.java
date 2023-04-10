@@ -1,12 +1,12 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package spring;
 
 import org.springframework.context.annotation.Configuration;
 
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.spring.EnableMats;
 import io.mats3.spring.MatsMapping;
 

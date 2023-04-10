@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 import static io.mats3.matsbrokermonitor.htmlgui.MatsBrokerMonitorHtmlGui.ACCESS_CONTROL_ALLOW_ALL;
 
@@ -10,13 +10,12 @@ import java.util.stream.Collectors;
 
 import javax.jms.ConnectionFactory;
 
-import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerService;
 import org.slf4j.Logger;
 
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsJbangJettyServer;
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangJettyServer;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.impl.jms.JmsMatsFactory;
 import io.mats3.matsbrokermonitor.activemq.ActiveMqMatsBrokerMonitor;
 import io.mats3.matsbrokermonitor.api.MatsBrokerBrowseAndActions;
@@ -47,11 +46,9 @@ public class ActiveMqRun {
     private static final Logger log = MatsTestHelp.getClassLogger();
 
     public static void main(String[] args) {
-        MatsJbangKit.configureLogbackToConsole_Info();
-
         // :: Create the Jetty instance running and displaying the MatsBrokerMonitor
         // Notice: It is the webapp that also brings up the ActiveMQ instance itself, to get good shutdown ordering.
-        MatsJbangJettyServer.create(8000, ActiveMqRun.class)
+        MatsJbangJettyServer.create(8000)
                 .setRootHtlm("""
                         <html><body>
                         <h1>ActiveMQ instance, with HTTP server.</h1>

@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package simple;
 
@@ -14,9 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import io.mats3.examples.MatsJbangJettyServer;
-import io.mats3.examples.MatsJbangJettyServer.FunctionalAsyncListener;
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangJettyServer;
+import io.mats3.examples.jbang.MatsJbangJettyServer.FunctionalAsyncListener;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;

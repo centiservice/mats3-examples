@@ -1,11 +1,11 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package stdexample;
 
 import io.mats3.MatsFactory;
-import io.mats3.examples.MatsJbangJettyServer;
+import io.mats3.examples.jbang.MatsJbangJettyServer;
 
 /**
  * Mats single-stage Endpoint which calculates <code>a*b</code>. A single Endpoint is a convenience method of creating a

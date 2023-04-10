@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+//DEPS io.mats3.examples:mats-jbangkit:RC1-1.0.0
 
 package simple;
 
@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 import io.mats3.MatsFactory;
 import io.mats3.MatsInitiator;
-import io.mats3.examples.MatsJbangKit;
+import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 
 /**
