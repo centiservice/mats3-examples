@@ -4,8 +4,6 @@
 
 package spring;
 
-import org.springframework.context.annotation.Configuration;
-
 import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.spring.EnableMats;
 import io.mats3.spring.MatsMapping;
@@ -16,7 +14,6 @@ import io.mats3.spring.MatsMapping;
  * fire up one of each if you want.
  */
 @EnableMats // Enables Mats3 SpringConfig
-@Configuration // Ensures that Spring processes inner classes, components, beans and configs
 public class SpringSimpleService {
     public static void main(String... args) {
         MatsJbangKit.startSpring();
