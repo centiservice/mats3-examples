@@ -1,3 +1,7 @@
+//usr/bin/env jbang "$0" "$@" ; exit $?
+//JAVA 17
+//DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
+
 package simple;
 
 import java.util.concurrent.CountDownLatch;

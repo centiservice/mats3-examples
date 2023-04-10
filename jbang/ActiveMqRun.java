@@ -1,6 +1,5 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 //JAVA 17
-//REPOS mavencentral,LocalMaven
 //DEPS io.mats3.examples:mats-jbangkit:RC0-1.0.0
 
 import static io.mats3.matsbrokermonitor.htmlgui.MatsBrokerMonitorHtmlGui.ACCESS_CONTROL_ALLOW_ALL;
