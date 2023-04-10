@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.jms.ConnectionFactory;
 
+import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerService;
 import org.slf4j.Logger;
 
@@ -51,9 +52,9 @@ public class ActiveMqRun {
 
     public static void main(String[] args) {
         MatsJbangKit.configureLogbackToConsole_Info();
-        BrokerService brokerService = MatsTestBroker.newActiveMqBroker(ActiveMq.LOCALHOST, ActiveMq.SHUTDOWNHOOK);
 
-        // :: Create the Jetty instance to display the MatsBrokerMonitor
+        // :: Create the Jetty instance running and displaying the MatsBrokerMonitor
+        // Notice: It is the webapp that also brings up the ActiveMQ instance itself, to get good shutdown ordering.
         MatsJbangJettyServer.create(8000, ActiveMqRun.class)
                 .setRootHtlm("""
                         <html><body>
@@ -65,14 +66,12 @@ public class ActiveMqRun {
                         """)
                 // Start Jetty, running all SCLs and Servlets in this class.
                 .start();
-
-        // Just wait until Ctrl-C or equivalent.
-        brokerService.waitUntilStopped();
     }
 
     @WebListener
     public static class MatsBrokerMonitor_SCL implements ServletContextListener {
 
+        private BrokerService _brokerService;
         private MatsFactory _matsFactory;
         private MatsBrokerMonitor _matsBrokerMonitor;
         private MatsBrokerBrowseAndActions _matsBrokerBrowseAndActions;
@@ -80,8 +79,24 @@ public class ActiveMqRun {
         @Override
         public void contextInitialized(ServletContextEvent sce) {
             log.info("ContextInitialized - setting up MatsBrokerMonitor + infrastructure.");
+
+            // :: Create the ActiveMQ broker "inside the webapp" to get nice shutdown order upon Ctrl-C/shutdown.
+            BrokerService brokerService;
+            // ?: Do we want persistent broker?
+            if (System.getProperty("persistent") != null) {
+                // -> Yes, persistent broker, so ask for KahaDB to be installed.
+                brokerService = MatsTestBroker.newActiveMqBroker(ActiveMq.LOCALHOST, ActiveMq.PERSISTENT);
+            }
+            else {
+                // -> No, not persistent broker.
+                brokerService = MatsTestBroker.newActiveMqBroker(ActiveMq.LOCALHOST);
+            }
+
             // :: Create the MatsBrokerMonitor
-            // NOTE: No need to do this on the same node holding the ActiveMQ, but just for convenience.
+            // NOTE: This DOES NOT need to be done on the ActiveMQ instance, as all interaction is done over messaging.
+            // The only requirement is that the ActiveMQ instance has the StatisticsPlugin installed.
+            // The MatsBrokerMonitor service and GUI can be run on e.g. a common system-wide monitor solution.
+            // The only reason we do it alongside the ActiveMQ process is that this effectively is our common monitor.
 
             // .. Create a ConnectionFactory to the ActiveMQ, going over TCP to the broker created above
             ConnectionFactory jmsConnectionFactory = MatsJbangKit.createActiveMqConnectionFactory();
@@ -110,18 +125,24 @@ public class ActiveMqRun {
             sce.getServletContext().setAttribute(MatsBrokerMonitorHtmlGui.class.getName(), matsBrokerMonitorHtmlGui);
 
             // :: Store the closable refs for clean shutdown
+            _brokerService = brokerService;
             _matsFactory = matsFactory;
             _matsBrokerMonitor = matsBrokerMonitor;
             _matsBrokerBrowseAndActions = matsBrokerBrowseAndActions;
-
         }
 
         @Override
         public void contextDestroyed(ServletContextEvent sce) {
-            // Clean up.
+            // Clean up in good order, broker last (otherwise we'll get connectivity exceptions on takedown).
             _matsBrokerBrowseAndActions.close();
             _matsBrokerMonitor.close();
             _matsFactory.stop(30_000);
+            try {
+                _brokerService.stop();
+            }
+            catch (Exception e) {
+                log.info("Got unexpected problem shutting down ActiveMQ broker", e);
+            }
         }
     }
 
