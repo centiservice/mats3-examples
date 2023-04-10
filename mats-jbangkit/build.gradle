@@ -9,7 +9,7 @@ repositories {
 }
 
 group = 'io.mats3.examples'
-version = 'RC0-1.0.0'
+version = 'RC1-1.0.0'
 
 java {
     withJavadocJar()
