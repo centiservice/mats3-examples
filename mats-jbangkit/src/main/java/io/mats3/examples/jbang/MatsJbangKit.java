@@ -1,4 +1,4 @@
-package io.mats3.examples;
+package io.mats3.examples.jbang;
 
 import java.io.IOException;
 import java.net.ServerSocket;

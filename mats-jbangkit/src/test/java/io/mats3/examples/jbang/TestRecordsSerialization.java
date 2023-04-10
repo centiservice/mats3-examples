@@ -1,4 +1,4 @@
-package io.mats3.examples;
+package io.mats3.examples.jbang;
 
 import io.mats3.serial.json.MatsSerializerJson;
 import org.junit.Assert;
