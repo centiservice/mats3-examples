@@ -17,6 +17,8 @@ public class SimpleServiceMinimal {
                 });
     }
 
+    // ----- Contract Request and Reply DTOs
+
     record SimpleServiceRequestDto(int number, String string) {
     }
 

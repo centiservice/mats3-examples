@@ -9,7 +9,6 @@ import io.mats3.examples.jbang.MatsJbangKit;
 import io.mats3.test.MatsTestHelp;
 import io.mats3.util.MatsFuturizer;
 import io.mats3.util.MatsFuturizer.Reply;
-import org.slf4j.Logger;
 
 import javax.jms.ConnectionFactory;
 import java.util.concurrent.CompletableFuture;
@@ -23,8 +22,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class SimpleServiceMainFuturization {
 
-    private static final Logger log = MatsJbangKit.getClassLogger();
-
     public static void main(String... args) throws Exception {
         // :: Create a JMS ConnectionFactory, MatsFactory and MatsFuturizer to demonstrate the setup.
         ConnectionFactory jmsConnectionFactory = MatsJbangKit.createActiveMqConnectionFactory();
@@ -36,18 +33,18 @@ public class SimpleServiceMainFuturization {
                 MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.1", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(1, "TestOne"));
         // Sync wait for the reply
-        log.info("######## Got reply #1! " + future1.get().getReply());
+        System.out.println("######## Got reply #1! " + future1.get().getReply());
 
         // ---- Two parallel calls, async wait for reply
         var wait2A = matsFuturizer.futurizeNonessential(
                         MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2A", "SimpleService.simple",
                         SimpleServiceReplyDto.class, new SimpleServiceRequestDto(20, "TestTwoA"))
-                .thenAccept(reply -> log.info("######## Got reply #2A! " + reply.getReply()));
+                .thenAccept(reply -> System.out.println("######## Got reply #2A! " + reply.getReply()));
 
         var wait2B = matsFuturizer.futurizeNonessential(
                         MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.2B", "SimpleService.simple",
                         SimpleServiceReplyDto.class, new SimpleServiceRequestDto(21, "TestTwoB"))
-                .thenAccept(reply -> log.info("######## Got reply #2B! " + reply.getReply()));
+                .thenAccept(reply -> System.out.println("######## Got reply #2B! " + reply.getReply()));
 
         wait2A.join();
         wait2B.join();
