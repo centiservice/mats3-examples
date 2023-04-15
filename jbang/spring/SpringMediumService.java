@@ -4,12 +4,6 @@
 
 package spring;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-
 import io.mats3.MatsEndpoint.ProcessContext;
 import io.mats3.MatsFactory;
 import io.mats3.examples.jbang.MatsJbangKit;
@@ -17,8 +11,15 @@ import io.mats3.spring.EnableMats;
 import io.mats3.spring.MatsClassMapping;
 import io.mats3.spring.MatsClassMapping.Stage;
 import io.mats3.spring.MatsMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
-/** Demonstrates Mats3' SpringConfig with @MatsMapping and @MatsClassMapping. */
+/**
+ * Demonstrates Mats3' SpringConfig with @MatsMapping and @MatsClassMapping.
+ */
 @EnableMats // Enables Mats3 SpringConfig
 @Configuration // Ensures that Spring processes inner classes, components, beans and configs
 public class SpringMediumService {
@@ -26,7 +27,7 @@ public class SpringMediumService {
         // One way to do it: Manually create MatsFactory in main, then use this for Spring
         // Could also have made it using a @Bean.
         MatsFactory matsFactory = MatsJbangKit.createMatsFactory();
-        // Fire up Spring, manually
+        // Manually fire up Spring
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
         ctx.registerBean(MatsFactory.class, () -> matsFactory);
         ctx.register(SpringMediumService.class);
@@ -34,6 +35,9 @@ public class SpringMediumService {
         // Note: SpringSimpleService instead uses a single-line MatsExampleKit to start Spring.
     }
 
+    private static final String PRIVATE_ENDPOINT = "SpringMediumService.private.matsMapping";
+
+    // A minimal Java "MultiplierService", defined as a Spring @Service.
     @Service
     static class MultiplierService {
         double multiply(double multiplicand, double multiplier) {
@@ -41,28 +45,25 @@ public class SpringMediumService {
         }
     }
 
+    // Inject the minimal Java MultiplierService, for use by the single-stage Mats Endpoint below.
     @Autowired
     private MultiplierService _multiplierService;
 
-    private static final String PRIVATE_ENDPOINT = "SpringMediumService.private.matsMapping";
-
-    // A single-stage Endpoint defined using @MatsMapping
+    // A single-stage Mats Endpoint defined using @MatsMapping
     @MatsMapping(PRIVATE_ENDPOINT)
     PrivateReplyDto endpoint(PrivateRequestDto msg) {
         return new PrivateReplyDto(_multiplierService.multiply(msg.multiplicand, msg.multiplier));
     }
 
-
-    /**
-     * An interface for a "Service", which is required by the @MatsClassMapping later, and provided by a
-     * {@code @Bean} in the {@code @Configuration} class below, {@link TestConfiguration}.
-     */
+    // An interface for an "ExponentiationService", which is required by the @MatsClassMapping below,
+    // and provided by a @Bean in the @Configuration class below.
     interface ExponentiationService {
         double exponentiate(double base, double exponent);
     }
 
     @Configuration
-    static class TestConfiguration {
+    static class ConfigurationForMediumService {
+        // Create an instance of the ExponentiationService interface
         @Bean
         public ExponentiationService exponentiationService() {
             return new ExponentiationService() {
@@ -78,7 +79,7 @@ public class SpringMediumService {
     @MatsClassMapping("SpringMediumService.matsClassMapping")
     static class SpringService_MatsClassMapping_Leaf {
 
-        // Autowired/Injected Spring Bean
+        // Autowired/Injected Spring Bean: the ExponentiationService defined above
         @Autowired
         private transient ExponentiationService _exponentiationService;
 
@@ -89,13 +90,13 @@ public class SpringMediumService {
         private double _exponent;
 
         @Stage(Stage.INITIAL)
-        void initial(SpringMediumServiceRequestDto msg) {
+        void receiveEndpointMessageAndRequestMultiplication(SpringMediumServiceRequestDto msg) {
             _exponent = msg.exponent;
             _context.request(PRIVATE_ENDPOINT, new PrivateRequestDto(msg.multiplicand, msg.multiplier));
         }
 
         @Stage(10)
-        SpringMediumServiceReplyDto second(PrivateReplyDto msg) {
+        SpringMediumServiceReplyDto exponentiateResult(PrivateReplyDto msg) {
             double result = _exponentiationService.exponentiate(msg.result, _exponent);
             return new SpringMediumServiceReplyDto(result);
         }
