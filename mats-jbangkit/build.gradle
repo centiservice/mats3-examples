@@ -22,7 +22,7 @@ compileJava {
 }
 
 ext {
-    version_Mats = '0.19.6-2023-03-29'
+    version_Mats = '0.19.7-2023-04-16'
     version_MatsBrokerMonitor = '0.1.5-2022-11-13'
 
     version_ActiveMq = '5.17.4'
