@@ -9,7 +9,7 @@ repositories {
 }
 
 group = 'io.mats3.examples'
-version = 'RC1-1.0.0'
+version = '1.0.0'
 
 java {
     withJavadocJar()
@@ -89,7 +89,7 @@ publishing {
         mavenJava(MavenPublication) {
             pom {
                 name = 'Mats^3 Examples'
-                description = 'Tooling to create simple Mats3 examples, plus a bunch of JBang examples'
+                description = 'Tooling to easily create Mats3 examples using JBang.'
                 url = 'https://github.com/centiservice/mats-examples'
                 licenses {
                     license {
