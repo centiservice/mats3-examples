@@ -30,7 +30,7 @@ public class SimpleServiceHttpServerMinimal {
                         <h3>LocalHtmlInspectForMatsFactory</h3>
                         <a href="localinspect">Monitoring/introspection GUI for the MatsFactory.</a><p>
                         <h3>Single, simple futurization:</h3>
-                        <a href="initiate_simple">Simple sync Servlet handling, single call.</a><p>
+                        <a href="initiate_single">Simple sync Servlet handling, single call.</a><p>
                         </body></html>
                         """)
                 .start();
@@ -38,7 +38,7 @@ public class SimpleServiceHttpServerMinimal {
 
     // ----- Simple Servlet doing a single Mats futurization, no timings.
 
-    @WebServlet("/initiate_simple")
+    @WebServlet("/initiate_single")
     public static class InitiateServlet_Simple extends HttpServlet {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
