@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 
 import javax.jms.ConnectionFactory;
 
+import io.mats3.MatsInitiator.KeepTrace;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.Queue;
@@ -135,6 +136,9 @@ public class MatsJbangKit {
         // step on each other's toes
         String origNodename = matsFactory.getFactoryConfig().getNodename();
         matsFactory.getFactoryConfig().setNodename(origNodename + "_" + RandomString.randomString(6));
+
+        // Since this is meant to demonstrate the functionality of Mats, pull out all the stops: FULL MatsTrace!
+        matsFactory.setDefaultKeepTrace(KeepTrace.FULL);
 
         // :: Add a shutdownhook to take it down in case of e.g. Ctrl-C - if it has not been done by the code.
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

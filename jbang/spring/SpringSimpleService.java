@@ -11,7 +11,7 @@ import io.mats3.spring.MatsMapping;
 /**
  * A simple, Spring-based, main-class style, single-stage Endpoint, replying with a modified version of the request.
  * This is directly a Spring-variant of {@link simple.SimpleService} - the endpoint is identical otherwise. You can
- * fire up one of each if you want.
+ * fire up a few of each if you want.
  */
 @EnableMats // Enables Mats3 SpringConfig
 public class SpringSimpleService {
