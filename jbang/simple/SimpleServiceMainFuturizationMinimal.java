@@ -16,7 +16,9 @@ public class SimpleServiceMainFuturizationMinimal {
     public static void main(String... args) throws Exception {
         MatsFuturizer matsFuturizer = MatsJbangKit.createMatsFuturizer();
 
-        // A "futurization" to the 'SimpleService.simple' MatsEndpoint
+        // A "futurization" to the 'SimpleService.simple' MatsEndpoint - demonstration purpose!
+        // NOTE: You would never do such a single-use, possibly repeated instantiation of MatsFuturizer in prod:
+        // The MatsFuturizer is a singleton, long-lived Java service, meant to live inside a long-lived JVM.
         CompletableFuture<Reply<SimpleServiceReplyDto>> future1 = matsFuturizer.futurizeNonessential(
                 MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.1", "SimpleService.simple",
                 SimpleServiceReplyDto.class, new SimpleServiceRequestDto(1, "TestOne"));

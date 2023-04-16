@@ -28,6 +28,10 @@ public class SimpleServiceMainFuturization {
         MatsFactory matsFactory = MatsJbangKit.createMatsFactory(jmsConnectionFactory);
         MatsFuturizer matsFuturizer = MatsFuturizer.createMatsFuturizer(matsFactory);
 
+        // Some "futurizations" to the 'SimpleService.simple' MatsEndpoint - demonstration purpose!
+        // NOTE: You would never do such a single-use, possibly repeated instantiation of MatsFuturizer in prod:
+        // The MatsFuturizer is a singleton, long-lived Java service, meant to live inside a long-lived JVM.
+
         // ----- A single call
         CompletableFuture<Reply<SimpleServiceReplyDto>> future1 = matsFuturizer.futurizeNonessential(
                 MatsTestHelp.traceId(), "SimpleServiceMainFuturization.main.1", "SimpleService.simple",
